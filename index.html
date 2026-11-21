@@ -36,7 +36,6 @@
     .main-capture-btn { width: 100%; height: 60px; border-radius: 12px; background: #ef4444; color: white; font-size: 18px; font-weight: bold; margin-bottom: 10px; border: none; }
     .camera-controls { display: flex; gap: 10px; margin-bottom: 15px; }
     
-    /* GALERIE PHOTOS AVEC SELECTION */
     .gallery-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 10px;}
     .photo-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-bottom: 20px; }
     .photo-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 3px solid transparent; cursor: pointer;}
@@ -45,9 +44,6 @@
     .photo-checkbox { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; color: transparent; pointer-events: none; }
     .photo-item.selected .photo-checkbox { background: #2563eb; color: white; }
 
-    .send-project { display: flex; align-items: center; gap: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 12px; }
-    .transfer-options { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 15px; font-size: 13px; color: #64748b; }
-    
     .bottom-nav { display: flex; position: sticky; bottom: 0; background: white; border-top: 1px solid #e2e8f0; }
     .nav-button { flex: 1; border: 0; background: white; padding: 14px 8px; cursor: pointer; color: #64748b; font-size: 12px; }
     .nav-button.active { color: #2563eb; font-weight: 700; }
@@ -106,13 +102,13 @@
       <div style="font-weight:700;">Galerie du projet</div>
       <div>
         <button onclick="toggleSelectAll()" style="background:none; border:none; color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline;">Tout sélectionner</button>
-        <span id="selectedCount" style="color:#2563eb; font-weight:bold; margin-left:10px;">0 sélection</span>
+        <span id="selectedCount" style="color:#2563eb; font-weight:bold; margin-left:10px;">0</span>
       </div>
     </div>
     
     <div id="photoGallery" class="photo-gallery"></div>
     
-    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp()">📤 ENVOYER DIRECTEMENT SUR WHATSAPP</button>
+    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp(event)">📤 ENVOYER SUR WHATSAPP</button>
     <button class="button secondary" onclick="finishProject()">TERMINER LE PROJET</button>
   </section>
 
@@ -132,6 +128,22 @@
 </div>
 
 <script>
+/* ============== TRADUCTIONS ============== */
+const translations = {
+  en: { project: "Project", date: "Date", at: "at" },
+  fr: { project: "Projet", date: "Date", at: "à" },
+  nl: { project: "Project", date: "Datum", at: "om" }
+};
+let currentLang = localStorage.getItem("photo_pro_lang") || "fr";
+
+function t(key) { return translations[currentLang][key] || translations['en'][key]; }
+
+function changeLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem("photo_pro_lang", lang);
+  document.getElementById("langSelector").value = lang;
+}
+
 /* ============== ETAT ============== */
 let projects = JSON.parse(localStorage.getItem("photo_pro_projects") || "[]");
 let currentProjectId = null;
@@ -218,19 +230,16 @@ function renderGallery(p) {
   p.photoData.forEach((url, index) => {
     const div = document.createElement("div");
     div.className = "photo-item" + (selectedPhotos.has(index) ? " selected" : "");
-    
     div.onclick = () => {
       if (selectedPhotos.has(index)) selectedPhotos.delete(index);
       else selectedPhotos.add(index);
       renderGallery(p);
     };
-
     div.ondblclick = (e) => {
       e.preventDefault();
       document.getElementById("modalImage").src = url;
       document.getElementById("photoModal").classList.add("show");
     };
-
     div.innerHTML = `<img src="${url}"><div class="photo-checkbox">✓</div>`;
     gallery.appendChild(div);
   });
@@ -251,8 +260,8 @@ function finishProject() {
   showScreen("homeScreen");
 }
 
-/* ============== PARTAGE DIRECT VERS WHATSAPP ============== */
-async function shareSelectedPhotosToWhatsApp() {
+/* ============== PARTAGE DIRECT VERS WHATSAPP (MULTI-FICHIERS) ============== */
+async function shareSelectedPhotosToWhatsApp(event) {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
 
@@ -263,13 +272,14 @@ async function shareSelectedPhotosToWhatsApp() {
 
   try {
     const now = new Date();
-    const dateStr = now.toISOString().slice(0,10);
+    // Formatage de la date selon la langue
+    const optionsDate = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    const dateStr = now.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang, optionsDate).replace(/\//g, '-');
     const timeStr = now.toTimeString().slice(0,5).replace(":", "h");
     
     const files = [];
     const selectedIndices = Array.from(selectedPhotos).sort((a,b) => a-b);
 
-    // Préparer les fichiers avec le bon nom (Projet_Date_Heure.jpg)
     for (const idx of selectedIndices) {
       const dataUrl = p.photoData[idx];
       if (!dataUrl) continue;
@@ -282,18 +292,31 @@ async function shareSelectedPhotosToWhatsApp() {
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
+    // Texte traduit
+    const shareText = `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
+
     const shareData = {
       files: files,
-      title: `Photos ${p.name}`,
-      text: `Projet: ${p.name}\nDate: ${dateStr} à ${timeStr}`
+      title: `${t('project')} ${p.name}`,
+      text: shareText
     };
 
-    // Vérification si le téléphone peut partager plusieurs fichiers (max 5 généralement)
+    // Vérification et envoi direct
     if (navigator.canShare && navigator.canShare(shareData)) {
-      // OUVERTURE DU MENU DE PARTAGE ANDROID
       await navigator.share(shareData);
     } else {
-      alert("Votre téléphone limite le partage direct à 5 photos maximum. Veuillez sélectionner moins de photos ou les envoyer en plusieurs fois.");
+      // Solution de secours : Envoi groupé via ZIP si le téléphone refuse le multi-partage
+      // (Android limite souvent à 5 photos, le ZIP permet de tout envoyer d'un coup)
+      alert("Votre téléphone ne supporte pas l'envoi de plusieurs photos d'un coup. Un fichier ZIP va être créé pour les envoyer.");
+      // La fonction createZipBlob est appelée ici pour envoyer le tout
+      const zipBlob = await createZipBlob(files);
+      const zipFile = new File([zipBlob], `${p.name}_${dateStr}_${timeStr}.zip`, { type: "application/zip" });
+      
+      await navigator.share({
+        files: [zipFile],
+        title: `${t('project')} ${p.name}`,
+        text: shareText
+      });
     }
 
   } catch (e) {
@@ -307,7 +330,58 @@ async function shareSelectedPhotosToWhatsApp() {
   }
 }
 
+/* ============== FONCTION ZIP DE SECOURS ============== */
+async function createZipBlob(files) {
+  const chunks = [];
+  const encoder = new TextEncoder();
+  const centralDir = [];
+  let offset = 0;
+
+  function crc32(data) {
+    let crc = 0xFFFFFFFF;
+    const table = crc32.table || (crc32.table = (() => {
+      const t = new Uint32Array(256);
+      for (let i = 0; i < 256; i++) { let c = i; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[i] = c; }
+      return t;
+    })());
+    for (let i = 0; i < data.length; i++) crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  for (const file of files) {
+    const nameBytes = encoder.encode(file.name);
+    const data = new Uint8Array(await file.arrayBuffer());
+    const crc = crc32(data);
+    const now = new Date();
+    const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+    const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+
+    const lh = new Uint8Array(30 + nameBytes.length);
+    const lv = new DataView(lh.buffer);
+    lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint16(6, 0, true); lv.setUint16(8, 0, true); lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true); lv.setUint32(14, crc, true); lv.setUint32(18, data.length, true); lv.setUint32(22, data.length, true); lv.setUint16(26, nameBytes.length, true); lh.set(nameBytes, 30);
+    chunks.push(lh, data);
+    centralDir.push({ nameBytes, crc, size: data.length, offset, dosTime, dosDate });
+    offset += lh.length + data.length;
+  }
+
+  const cdStart = offset;
+  for (const entry of centralDir) {
+    const ch = new Uint8Array(46 + entry.nameBytes.length);
+    const cv = new DataView(ch.buffer);
+    cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0, true); cv.setUint16(10, 0, true); cv.setUint16(12, entry.dosTime, true); cv.setUint16(14, entry.dosDate, true); cv.setUint32(16, entry.crc, true); cv.setUint32(20, entry.size, true); cv.setUint32(24, entry.size, true); cv.setUint16(28, entry.nameBytes.length, true); cv.setUint32(42, entry.offset, true); ch.set(entry.nameBytes, 46);
+    chunks.push(ch);
+    offset += ch.length;
+  }
+
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, centralDir.length, true); ev.setUint16(10, centralDir.length, true); ev.setUint32(12, offset - cdStart, true); ev.setUint32(16, cdStart, true);
+  chunks.push(eocd);
+  return new Blob(chunks, { type: "application/zip" });
+}
+
 // Initialisation
+document.getElementById("langSelector").value = currentLang;
 renderProjects();
 </script>
 </body>
