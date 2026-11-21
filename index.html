@@ -28,37 +28,29 @@
     .primary:disabled { background: #93c5fd; cursor: wait; }
     .secondary { background: #e5e7eb; color: #111827; }
     .success { background: #16a34a; color: white; }
-    .danger { background: #fee2e2; color: #991b1b; }
+    .whatsapp-btn { background: #25D366; color: white; }
     
     .projects { margin-top: 10px; }
     .project { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px; margin-bottom: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; }
-    .project:hover { background: #f1f5f9; }
     .project-name { font-weight: 700; }
     .project-info { margin-top: 4px; color: #64748b; font-size: 12px; word-break: break-all; }
     .photo-count { white-space: nowrap; font-weight: 700; color: #2563eb; }
     
-    /* CAMERA */
-    .camera-container { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #111827; margin-bottom: 10px; transition: opacity 0.1s; }
+    .camera-container { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #111827; margin-bottom: 10px; }
     #video { width: 100%; height: 100%; object-fit: cover; display: none; }
     .camera-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #94a3b8; text-align: center; padding: 30px; }
-    .camera-status { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; color: white; font-size: 12px; z-index: 2; }
-    .camera-project { background: rgba(0,0,0,0.55); padding: 7px 10px; border-radius: 20px; }
-    .camera-indicator { background: #16a34a; padding: 7px 10px; border-radius: 20px; }
-
+    
     .camera-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
     .camera-controls .button { margin-top: 0; flex: 1; min-width: 120px; }
     .flip-btn { background: #f59e0b; color: #fff; }
 
-    /* BOUTON CAPTURE PRINCIPAL (ROUGE) */
-    .main-capture-btn { width: 100%; height: 70px; border-radius: 12px; background: #ef4444; border: 2px solid #ffffff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; font-weight: bold; transition: transform 0.1s; margin-bottom: 15px;}
+    .main-capture-btn { width: 100%; height: 70px; border-radius: 12px; background: #ef4444; border: 2px solid #ffffff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; font-weight: bold; margin-bottom: 15px;}
     .main-capture-btn:active { transform: scale(0.98); background: #dc2626; }
 
-    /* GALERIE PHOTOS */
     .gallery-title { font-weight: 700; margin-top: 10px; margin-bottom: 10px; font-size: 15px; }
     .photo-gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; min-height: 85px; }
     .photo-gallery img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #cbd5e1; cursor: pointer; }
 
-    /* SEND SCREEN */
     .select-all { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; }
     .select-all input, .project-check { width: 20px; height: 20px; }
     .send-project { display: flex; align-items: center; gap: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 12px; }
@@ -66,9 +58,7 @@
     .send-project-name { font-weight: 700; }
     .send-project-meta { color: #64748b; font-size: 12px; margin-top: 4px; }
     .transfer-options { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-    .transfer-options .date-info { font-size: 13px; color: #64748b; margin-top: 8px; }
     
-    /* NAV & UTILS */
     .bottom-nav { display: flex; position: sticky; bottom: 0; background: white; border-top: 1px solid #e2e8f0; }
     .nav-button { flex: 1; border: 0; background: white; padding: 14px 8px; cursor: pointer; color: #64748b; font-size: 12px; }
     .nav-button.active { color: #2563eb; font-weight: 700; }
@@ -78,21 +68,12 @@
     .message.show { display: block; }
     .message.error { background: #fef2f2; color: #991b1b; }
     .message.success { background: #f0fdf4; color: #166534; }
-    
-    .diag { background: #fff7ed; border: 1px solid #fdba74; color: #7c2d12; padding: 12px; border-radius: 10px; font-size: 13px; margin-top: 12px; display: none; }
-    .diag.show { display: block; }
-    .diag ul { margin: 8px 0 0 16px; padding: 0; }
 
-    /* MODAL PHOTO PLEIN ECRAN */
     .photo-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; }
     .photo-modal.show { display: flex; }
     .photo-modal img { max-width: 100%; max-height: 80vh; object-fit: contain; }
-    .photo-modal .close-btn { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; background: none; border: none; cursor: pointer; padding: 10px; }
-
-    /* FLASH EFFECT */
+    .photo-modal .close-btn { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; background: none; border: none; cursor: pointer; }
     .flash-effect { position: absolute; inset: 0; background: white; opacity: 0; z-index: 10; pointer-events: none; transition: opacity 0.1s; }
-    
-    @media (min-width: 600px) { body { padding: 30px 0; } .app { min-height: 800px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); } }
   </style>
 </head>
 <body>
@@ -109,40 +90,29 @@
     </select>
   </header>
 
-  <!-- HOME -->
   <section id="homeScreen" class="screen active">
     <div class="title" data-i18n="myProjects">My projects</div>
-    <div class="description" data-i18n="homeDesc">Create a project, take photos and keep each site separate.</div>
-    
     <input type="text" id="searchInput" class="input" placeholder="🔍 Rechercher par nom ou date..." oninput="renderProjects()" />
-    
     <button class="button primary" onclick="showNewProject()" data-i18n="newProject">+ NEW PROJECT</button>
     <div class="projects"><div id="projectList"></div></div>
   </section>
 
-  <!-- NEW PROJECT -->
   <section id="newProjectScreen" class="screen">
     <div class="title" data-i18n="newProjectTitle">New project</div>
-    <div class="description" data-i18n="newProjectDesc">Enter the project number or name.</div>
     <input id="projectInput" class="input" type="text" placeholder="Ex: AB45821" autocomplete="off" />
     <button class="button primary" onclick="createProject()" data-i18n="startPhotos">📷 START PHOTOS</button>
     <button class="button secondary" onclick="showScreen('homeScreen')" data-i18n="back">Back</button>
     <div id="projectMessage" class="message"></div>
   </section>
 
-  <!-- CAMERA -->
   <section id="cameraScreen" class="screen">
     <div class="title" data-i18n="photos">Photos</div>
     <div class="description"><span data-i18n="currentProject">Current project:</span> <strong id="currentProjectName"></strong></div>
     
     <div class="camera-container" id="cameraContainer">
-      <div class="camera-status">
-        <div class="camera-project" id="cameraProject">Project</div>
-        <div class="camera-indicator" id="cameraIndicator">● CAMERA</div>
-      </div>
       <video id="video" autoplay playsinline muted></video>
       <div id="cameraPlaceholder" class="camera-placeholder">
-        <div><div style="font-size:45px;">📷</div><div data-i18n="activateCameraHint">Tap « Activate camera »</div></div>
+        <div style="font-size:45px;">📷</div>
       </div>
       <div id="flashEffect" class="flash-effect"></div>
     </div>
@@ -160,36 +130,29 @@
     <button class="button secondary" onclick="finishProject()" data-i18n="finishProject">✓ TERMINER LE PROJET</button>
     <button class="button secondary" onclick="showScreen('homeScreen')" data-i18n="changeProject">Changer de projet</button>
     <div id="cameraMessage" class="message"></div>
-    <div id="cameraDiag" class="diag">
-      <strong data-i18n="diagTitle">Diagnosis:</strong>
-      <ul id="diagList"></ul>
-    </div>
   </section>
 
-  <!-- SEND -->
   <section id="sendScreen" class="screen">
-    <div class="title" data-i18n="send">Envoi vers WhatsApp</div>
-    <div class="description" data-i18n="sendDesc">Sélectionnez les projets pour les envoyer.</div>
+    <div class="title">Envoi vers WhatsApp</div>
+    <div class="description">Sélectionnez les projets pour les envoyer.</div>
     
     <div class="select-all">
       <input type="checkbox" id="selectAll" onchange="toggleAllProjects()" />
-      <label for="selectAll" data-i18n="selectAll">Sélectionner tous les projets</label>
+      <label for="selectAll">Sélectionner tous les projets</label>
     </div>
     
     <div id="sendProjectList"></div>
     
     <div class="transfer-options">
-      <div class="date-info" id="transferDateInfo"></div>
+      <div class="date-info" id="transferDateInfo" style="font-size: 13px; color: #64748b;"></div>
     </div>
     
-    <!-- DOUBLE BOUTON POUR LE TRANSFERT -->
-    <button id="btnCreateZip" class="button primary" onclick="preparePhotos()">1. 📦 PRÉPARER LES PHOTOS</button>
-    <button id="btnShareZip" class="button success" onclick="sharePhotos()" style="display:none;">2. 📤 ENVOYER SUR WHATSAPP</button>
+    <button id="btnCreateZip" class="button primary" onclick="preparePhotos()">1. 📥 TÉLÉCHARGER LES PHOTOS</button>
+    <button id="btnShareZip" class="button whatsapp-btn" onclick="sharePhotos()" style="display:none;">2. 📤 OUVRIR WHATSAPP</button>
     
     <div id="sendMessage" class="message"></div>
   </section>
 
-  <!-- NAV -->
   <nav class="bottom-nav">
     <button class="nav-button active" data-screen="homeScreen" onclick="showScreen('homeScreen')">
       <span class="nav-icon">🏠</span><span data-i18n="navHome">Home</span>
@@ -203,164 +166,97 @@
   </nav>
 </div>
 
-<!-- MODAL POUR VOIR LES PHOTOS EN GRAND -->
 <div id="photoModal" class="photo-modal">
   <button class="close-btn" onclick="closePhotoModal()">✕</button>
   <img id="modalImage" src="" alt="Photo" />
 </div>
 
 <script>
-/* ============== TRANSLATIONS ============== */
+/* ============== TRADUCTIONS ============== */
 const translations = {
   en: {
     subtitle: "Local construction site photo management",
     myProjects: "My projects",
-    homeDesc: "Create a project, take photos and keep each site separate.",
     newProject: "+ NEW PROJECT",
     newProjectTitle: "New project",
-    newProjectDesc: "Enter the project number or name.",
     startPhotos: "📷 START PHOTOS",
     back: "Back",
     photos: "Photos",
     currentProject: "Current project:",
-    activateCameraHint: "Tap « Activate camera »",
     activateCamera: "ACTIVATE CAMERA",
     flipCamera: "🔄 FLIP",
     finishProject: "✓ FINISH PROJECT",
     changeProject: "Change project",
-    send: "Send to WhatsApp",
-    sendDesc: "Select the projects to send.",
-    selectAll: "Select all projects",
     navHome: "Home",
     navProject: "Project",
     navSend: "Send",
-    diagTitle: "Diagnosis:",
     msgEnterProject: "Enter a project number or name.",
-    msgInvalidProject: "The project name is invalid.",
-    msgCameraBack: "Rear camera activated.",
-    msgCameraFront: "Front camera activated.",
-    msgCameraError: "Cannot access camera. See diagnosis below.",
     msgNoProject: "No project selected.",
     msgPhotoSaved: "Photo {n} saved.",
-    msgPhotoDemo: "Photo {n} saved in {name}.",
     msgSelectOne: "Select at least one project.",
-    msgPrepared: "Photos ready: {names}",
-    msgShareUnsupported: "System sharing is not available in this browser.",
     msgNoProjects: "No projects yet.",
     msgNoProjectsAvailable: "No projects available.",
-    msgLoading: "Preparing photos... Please wait.",
-    transferDate: "Transfer date and time: {date}",
-    diagHttps: "Page is not served over HTTPS. The camera API only works on HTTPS or localhost.",
-    diagApiMissing: "navigator.mediaDevices is not available. Use HTTPS or a recent browser.",
-    diagNotAllowed: "Camera permission denied. Allow it in the browser settings for this site.",
-    diagNotFound: "No camera found on this device.",
-    diagNotReadable: "Camera is busy or not readable. Close other apps using the camera.",
-    diagOverconstrained: "Camera does not support requested constraints. Try flipping.",
-    diagUnknown: "Unknown error. Try Firefox for Android to confirm."
+    msgLoading: "Preparing...",
+    transferDate: "Transfer date: {date}"
   },
   fr: {
     subtitle: "Gestion locale des photos de chantier",
     myProjects: "Mes projets",
-    homeDesc: "Crée un projet, prends tes photos et conserve chaque chantier séparément.",
     newProject: "+ NOUVEAU PROJET",
     newProjectTitle: "Nouveau projet",
-    newProjectDesc: "Entre le numéro ou le nom du projet.",
-    startPhotos: "📷 COMMENCER LES PHOTOS",
+    startPhotos: "📷 COMMENCER",
     back: "Retour",
     photos: "Photos",
     currentProject: "Projet actuel :",
-    activateCameraHint: "Appuie sur « Activer la caméra »",
     activateCamera: "ACTIVER CAMERA",
     flipCamera: "🔄 BASCULER",
-    finishProject: "✓ TERMINER LE PROJET",
+    finishProject: "✓ TERMINER",
     changeProject: "Changer de projet",
-    send: "Envoi vers WhatsApp",
-    sendDesc: "Sélectionnez les projets pour les envoyer.",
-    selectAll: "Sélectionner tous les projets",
     navHome: "Accueil",
     navProject: "Projet",
     navSend: "Envoi",
-    diagTitle: "Diagnostic :",
-    msgEnterProject: "Entre un numéro ou un nom de projet.",
-    msgInvalidProject: "Le nom du projet n'est pas valide.",
-    msgCameraBack: "Caméra arrière activée.",
-    msgCameraFront: "Caméra avant activée.",
-    msgCameraError: "Impossible d'accéder à la caméra. Voir le diagnostic ci-dessous.",
-    msgNoProject: "Aucun projet sélectionné.",
+    msgEnterProject: "Entre un nom de projet.",
+    msgNoProject: "Aucun projet.",
     msgPhotoSaved: "Photo {n} enregistrée.",
-    msgPhotoDemo: "Photo {n} enregistrée dans {name}.",
     msgSelectOne: "Sélectionne au moins un projet.",
-    msgPrepared: "Photos prêtes : {names}",
-    msgShareUnsupported: "Le partage système n'est pas disponible dans ce navigateur.",
-    msgNoProjects: "Aucun projet pour le moment.",
+    msgNoProjects: "Aucun projet.",
     msgNoProjectsAvailable: "Aucun projet disponible.",
-    msgLoading: "Préparation des photos... Veuillez patienter.",
-    transferDate: "Date et heure du transfert : {date}",
-    diagHttps: "La page n'est pas servie en HTTPS. L'API caméra ne fonctionne qu'en HTTPS ou localhost.",
-    diagApiMissing: "navigator.mediaDevices indisponible. Utilise HTTPS ou un navigateur récent.",
-    diagNotAllowed: "Permission caméra refusée. Autorise-la dans les paramètres du navigateur pour ce site.",
-    diagNotFound: "Aucune caméra trouvée sur cet appareil.",
-    diagNotReadable: "Caméra occupée ou illisible. Ferme les autres applis utilisant la caméra.",
-    diagOverconstrained: "La caméra ne supporte pas les contraintes demandées. Essaie de basculer.",
-    diagUnknown: "Erreur inconnue. Essaie Firefox pour Android pour confirmer."
+    msgLoading: "Préparation...",
+    transferDate: "Date du transfert : {date}"
   },
   nl: {
     subtitle: "Lokaal beheer van bouwplaatsfoto's",
     myProjects: "Mijn projecten",
-    homeDesc: "Maak een project aan, neem foto's en bewaar elk project apart.",
     newProject: "+ NIEUW PROJECT",
     newProjectTitle: "Nieuw project",
-    newProjectDesc: "Voer het projectnummer of de naam in.",
-    startPhotos: "📷 FOTO'S STARTEN",
+    startPhotos: "📷 STARTEN",
     back: "Terug",
     photos: "Foto's",
     currentProject: "Huidig project:",
-    activateCameraHint: "Druk op « Camera activeren »",
     activateCamera: "CAMERA ACTIVEREN",
     flipCamera: "🔄 WISSELEN",
-    finishProject: "✓ PROJECT VOLTOOIEN",
+    finishProject: "✓ VOLTOOIEN",
     changeProject: "Project wijzigen",
-    send: "Verzenden naar WhatsApp",
-    sendDesc: "Selecteer de projecten om te verzenden.",
-    selectAll: "Alle projecten selecteren",
     navHome: "Home",
     navProject: "Project",
     navSend: "Verzenden",
-    diagTitle: "Diagnose:",
-    msgEnterProject: "Voer een projectnummer of naam in.",
-    msgInvalidProject: "De projectnaam is ongeldig.",
-    msgCameraBack: "Achtercamera geactiveerd.",
-    msgCameraFront: "Frontcamera geactiveerd.",
-    msgCameraError: "Kan geen toegang krijgen tot de camera. Zie diagnose hieronder.",
-    msgNoProject: "Geen project geselecteerd.",
+    msgEnterProject: "Voer een projectnaam in.",
+    msgNoProject: "Geen project.",
     msgPhotoSaved: "Foto {n} opgeslagen.",
-    msgPhotoDemo: "Foto {n} opgeslagen in {name}.",
     msgSelectOne: "Selecteer minstens één project.",
-    msgPrepared: "Foto's klaar: {names}",
-    msgShareUnsupported: "Systeem delen is niet beschikbaar in deze browser.",
-    msgNoProjects: "Nog geen projecten.",
+    msgNoProjects: "Geen projecten.",
     msgNoProjectsAvailable: "Geen projecten beschikbaar.",
-    msgLoading: "Foto's voorbereiden... Even geduld.",
-    transferDate: "Datum en tijd van overdracht: {date}",
-    diagHttps: "Pagina wordt niet via HTTPS geleverd. De camera-API werkt alleen via HTTPS of localhost.",
-    diagApiMissing: "navigator.mediaDevices is niet beschikbaar. Gebruik HTTPS of een recente browser.",
-    diagNotAllowed: "Cameratoestemming geweigerd. Sta het toe in de browserinstellingen voor deze site.",
-    diagNotFound: "Geen camera gevonden op dit apparaat.",
-    diagNotReadable: "Camera is bezet of niet leesbaar. Sluit andere apps die de camera gebruiken.",
-    diagOverconstrained: "Camera ondersteunt de gevraagde beperkingen niet. Probeer te wisselen.",
-    diagUnknown: "Onbekende fout. Probeer Firefox voor Android om te bevestigen."
+    msgLoading: "Voorbereiden...",
+    transferDate: "Datum: {date}"
   }
 };
 
-let currentLang = localStorage.getItem("photo_pro_lang") || "en";
+let currentLang = localStorage.getItem("photo_pro_lang") || "fr";
 let currentScreenId = "homeScreen";
-let preparedFilesArray = []; // Tableau pour stocker les photos en attente d'envoi
 
 function t(key, vars = {}) {
-  let str = translations[currentLang]?.[key] || translations.en[key] || key;
-  for (const [k, v] of Object.entries(vars)) {
-    str = str.replace(new RegExp(`\\{${k}\\}`, "g"), v);
-  }
+  let str = translations[currentLang]?.[key] || translations.fr[key] || key;
+  for (const [k, v] of Object.entries(vars)) str = str.replace(new RegExp(`\\{${k}\\}`, "g"), v);
   return str;
 }
 
@@ -370,8 +266,6 @@ function applyTranslations() {
     if (translated) el.textContent = translated;
   });
   document.getElementById("langSelector").value = currentLang;
-  document.documentElement.lang = currentLang;
-  updateTransferDateInfo();
 }
 
 function changeLanguage(lang) {
@@ -382,101 +276,59 @@ function changeLanguage(lang) {
 
 /* ============== STATE ============== */
 const STORAGE_KEY = "photo_pro_projects";
-let projects = loadProjects();
+let projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 let currentProjectId = null;
 let cameraStream = null;
 let cameraFacing = "environment";
 
-function loadProjects() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch (e) { console.error(e); return []; }
-}
-
 function saveProjects() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-  } catch (e) {
-    console.error("Save error:", e);
-    showMessage("cameraMessage", "Storage full or unavailable.", "error");
-  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } 
+  catch (e) { alert("Mémoire pleine."); }
 }
 
-/* ============== NAVIGATION ============== */
 function showScreen(screenId) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  const screen = document.getElementById(screenId);
-  if (screen) screen.classList.add("active");
-  
-  document.querySelectorAll(".nav-button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.screen === screenId);
-  });
-  
+  document.getElementById(screenId).classList.add("active");
+  document.querySelectorAll(".nav-button").forEach(btn => btn.classList.toggle("active", btn.dataset.screen === screenId));
   currentScreenId = screenId;
-
   if (screenId === "homeScreen") renderProjects();
-  if (screenId === "sendScreen") { renderSendProjects(); updateTransferDateInfo(); }
+  if (screenId === "sendScreen") { renderSendProjects(); updateDateInfo(); }
 }
 
 function showNewProject() {
   showScreen("newProjectScreen");
-  const input = document.getElementById("projectInput");
-  input.value = "";
-  setTimeout(() => input.focus(), 100);
+  document.getElementById("projectInput").value = "";
+  setTimeout(() => document.getElementById("projectInput").focus(), 100);
 }
 
-/* ============== PROJETS & RECHERCHE ============== */
 function renderProjects() {
   const container = document.getElementById("projectList");
-  const searchTerm = document.getElementById("searchInput") ? document.getElementById("searchInput").value.toLowerCase() : "";
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
   container.innerHTML = "";
-
-  const filtered = projects.filter(p => 
-    p.name.toLowerCase().includes(searchTerm) || 
-    p.folderName.toLowerCase().includes(searchTerm)
-  );
-
+  const filtered = projects.filter(p => p.name.toLowerCase().includes(searchTerm) || p.folderName.toLowerCase().includes(searchTerm));
+  
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty">${t("msgNoProjects")}</div>`;
-    return;
+    container.innerHTML = `<div class="empty">${t("msgNoProjects")}</div>`; return;
   }
-
   filtered.forEach(project => {
     const el = document.createElement("div");
     el.className = "project";
     el.onclick = () => { currentProjectId = project.id; openCameraScreen(); };
-    el.innerHTML = `
-      <div>
-        <div class="project-name">${escapeHTML(project.name)}</div>
-        <div class="project-info">${escapeHTML(project.folderName)}</div>
-      </div>
-      <div class="photo-count">${project.photos} photo${project.photos > 1 ? "s" : ""}</div>
-    `;
+    el.innerHTML = `<div><div class="project-name">${project.name}</div><div class="project-info">${project.folderName}</div></div><div class="photo-count">${project.photos} 📸</div>`;
     container.appendChild(el);
   });
 }
 
 function createProject() {
-  const input = document.getElementById("projectInput");
-  let projectName = input.value.trim();
-  if (!projectName) { showMessage("projectMessage", t("msgEnterProject"), "error"); return; }
-  projectName = projectName.replace(/[^a-zA-Z0-9À-ÿ _-]/g, "");
-  if (!projectName) { showMessage("projectMessage", t("msgInvalidProject"), "error"); return; }
-
+  let name = document.getElementById("projectInput").value.trim();
+  if (!name) return;
   const now = new Date();
-  const date = formatDate(now);
-  const time = formatTime(now);
-  const folderName = `PROJET_${projectName}_${date}_${time}`;
-
+  const date = now.toISOString().slice(0,10);
+  const time = now.toTimeString().slice(0,5).replace(":", "-");
+  
   const project = {
-    id: Date.now(),
-    name: projectName,
-    folderName,
-    date, time,
-    photos: 0,
-    photoData: [],
-    createdAt: now.toISOString()
+    id: Date.now(), name: name, folderName: `PROJET_${name}_${date}_${time}`,
+    photos: 0, photoData: []
   };
   projects.unshift(project);
   saveProjects();
@@ -484,179 +336,93 @@ function createProject() {
   openCameraScreen();
 }
 
-function formatDate(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function formatTime(d) {
-  return `${String(d.getHours()).padStart(2,"0")}-${String(d.getMinutes()).padStart(2,"0")}-${String(d.getSeconds()).padStart(2,"0")}`;
-}
-function getCurrentProject() { return projects.find(p => p.id === currentProjectId); }
-
 async function openCameraScreen() {
-  const project = getCurrentProject();
-  if (!project) return;
-  document.getElementById("currentProjectName").textContent = project.name;
-  document.getElementById("cameraProject").textContent = project.name;
-  document.getElementById("cameraIndicator").textContent = "● CAMERA";
-  renderGallery(project);
+  const p = projects.find(x => x.id === currentProjectId);
+  document.getElementById("currentProjectName").textContent = p.name;
+  renderGallery(p);
   showScreen("cameraScreen");
-  
-  if (!cameraStream) {
-    await startCamera();
-  }
-}
-
-function renderGallery(project) {
-  const gallery = document.getElementById("photoGallery");
-  const countSpan = document.getElementById("galleryCount");
-  if (!gallery || !countSpan) return;
-
-  gallery.innerHTML = "";
-  countSpan.textContent = project.photos;
-
-  project.photoData.forEach((dataUrl) => {
-    if (dataUrl) {
-      const img = document.createElement("img");
-      img.src = dataUrl;
-      img.onclick = () => openPhotoModal(dataUrl);
-      gallery.appendChild(img);
-    }
-  });
-}
-
-/* ============== MODAL PHOTO ============== */
-function openPhotoModal(dataUrl) {
-  document.getElementById("modalImage").src = dataUrl;
-  document.getElementById("photoModal").classList.add("show");
-}
-function closePhotoModal() {
-  document.getElementById("photoModal").classList.remove("show");
-}
-
-/* ============== CAMERA ============== */
-function diagReset() {
-  const el = document.getElementById("cameraDiag");
-  const ul = document.getElementById("diagList");
-  ul.innerHTML = "";
-  el.classList.remove("show");
-}
-
-function diagAdd(msgKey) {
-  const el = document.getElementById("cameraDiag");
-  const ul = document.getElementById("diagList");
-  const li = document.createElement("li");
-  li.textContent = t(msgKey);
-  ul.appendChild(li);
-  el.classList.add("show");
+  if (!cameraStream) startCamera();
 }
 
 async function startCamera() {
-  diagReset();
   const video = document.getElementById("video");
-  const placeholder = document.getElementById("cameraPlaceholder");
-
-  if (!window.isSecureContext) { diagAdd("diagHttps"); return; }
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { diagAdd("diagApiMissing"); return; }
-
   try {
     if (cameraStream) stopCamera();
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: cameraFacing } },
-      audio: false
-    });
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: cameraFacing } }, audio: false });
     video.srcObject = cameraStream;
     video.style.display = "block";
-    placeholder.style.display = "none";
-    document.getElementById("cameraButton").textContent = "CAMERA ACTIVE";
-  } catch (error) {
-    console.error(error.name, error.message);
-    showMessage("cameraMessage", t("msgCameraError"), "error");
-    switch (error.name) {
-      case "NotAllowedError": case "PermissionDeniedError": diagAdd("diagNotAllowed"); break;
-      case "NotFoundError": case "DevicesNotFoundError": diagAdd("diagNotFound"); break;
-      case "NotReadableError": case "TrackStartError": diagAdd("diagNotReadable"); break;
-      case "OverconstrainedError": case "ConstraintNotSatisfiedError": diagAdd("diagOverconstrained"); break;
-      default: diagAdd("diagUnknown");
-    }
-  }
+    document.getElementById("cameraPlaceholder").style.display = "none";
+  } catch (e) { alert("Erreur Caméra: " + e.name); }
 }
 
 function stopCamera() {
-  if (!cameraStream) return;
-  cameraStream.getTracks().forEach(track => track.stop());
-  cameraStream = null;
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+    document.getElementById("video").style.display = "none";
+    document.getElementById("cameraPlaceholder").style.display = "flex";
+  }
 }
 
-async function flipCamera() {
-  cameraFacing = cameraFacing === "user" ? "environment" : "user";
-  if (cameraStream) { stopCamera(); await startCamera(); }
-}
+function flipCamera() { cameraFacing = cameraFacing === "environment" ? "user" : "environment"; startCamera(); }
 
 function takePhoto() {
-  const project = getCurrentProject();
-  if (!project) return;
+  const p = projects.find(x => x.id === currentProjectId);
   const video = document.getElementById("video");
+  if (!p || !cameraStream) return;
 
   const flash = document.getElementById("flashEffect");
   flash.style.opacity = "0.8";
   setTimeout(() => flash.style.opacity = "0", 150);
 
-  if (!cameraStream) {
-    project.photos += 1;
-    project.photoData.push(null);
-    saveProjects();
-    renderGallery(project);
-    return;
-  }
-
   const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
   const ctx = canvas.getContext("2d");
   if (cameraFacing === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+  ctx.drawImage(video, 0, 0);
 
-  project.photos += 1;
-  project.photoData.push(dataUrl);
+  p.photoData.push(canvas.toDataURL("image/jpeg", 0.7));
+  p.photos = p.photoData.length;
   saveProjects();
-  renderGallery(project);
-  showMessage("cameraMessage", t("msgPhotoSaved", { n: project.photos }), "success");
+  renderGallery(p);
 }
 
-function finishProject() { stopCamera(); showScreen("homeScreen"); renderProjects(); }
+function renderGallery(p) {
+  const gallery = document.getElementById("photoGallery");
+  document.getElementById("galleryCount").textContent = p.photos;
+  gallery.innerHTML = "";
+  p.photoData.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => { document.getElementById("modalImage").src = url; document.getElementById("photoModal").classList.add("show"); };
+    gallery.appendChild(img);
+  });
+}
 
-/* ============== RENDER SEND ============== */
-function showSendScreen() { showScreen("sendScreen"); renderSendProjects(); updateTransferDateInfo(); }
+function closePhotoModal() { document.getElementById("photoModal").classList.remove("show"); }
+function finishProject() { stopCamera(); showScreen("homeScreen"); }
+
+/* ============== SEND ============== */
+function showSendScreen() { showScreen("sendScreen"); renderSendProjects(); updateDateInfo(); }
 
 function renderSendProjects() {
   const container = document.getElementById("sendProjectList");
   container.innerHTML = "";
-  if (projects.length === 0) {
-    container.innerHTML = `<div class="empty">${t("msgNoProjectsAvailable")}</div>`;
-    return;
-  }
-  projects.forEach(project => {
-    const el = document.createElement("div");
-    el.className = "send-project";
-    el.innerHTML = `
-      <input class="project-check" type="checkbox" value="${project.id}">
-      <div class="send-project-info">
-        <div class="send-project-name">${escapeHTML(project.name)}</div>
-        <div class="send-project-meta">${escapeHTML(project.folderName)} · ${project.photos} photo${project.photos > 1 ? "s" : ""}</div>
+  projects.forEach(p => {
+    container.innerHTML += `
+      <div class="send-project">
+        <input class="project-check" type="checkbox" value="${p.id}">
+        <div class="send-project-info">
+          <div class="send-project-name">${p.name}</div>
+          <div class="send-project-meta">${p.photos} photos</div>
+        </div>
       </div>
     `;
-    container.appendChild(el);
   });
 }
 
-function updateTransferDateInfo() {
-  const el = document.getElementById("transferDateInfo");
-  if (!el) return;
-  const now = new Date();
-  el.textContent = t("transferDate", {
-    date: `${formatDate(now)} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`
-  });
+function updateDateInfo() {
+  document.getElementById("transferDateInfo").textContent = t("transferDate", { date: new Date().toLocaleString() });
 }
 
 function toggleAllProjects() {
@@ -668,130 +434,64 @@ function getSelectedProjects() {
   return checked.map(cb => projects.find(p => p.id === Number(cb.value))).filter(Boolean);
 }
 
-/* ============== PREPARATION ET PARTAGE WHATSAPP ============== */
+/* ============== TRANSFERT & WHATSAPP ============== */
 async function preparePhotos() {
   const selected = getSelectedProjects();
-  if (selected.length === 0) {
-    showMessage("sendMessage", t("msgSelectOne"), "error");
-    return;
-  }
-  
+  if (selected.length === 0) return alert("Sélectionnez un projet.");
+
   const btn = document.getElementById("btnCreateZip");
   const originalText = btn.textContent;
-  btn.textContent = t("msgLoading");
+  btn.textContent = "Téléchargement en cours...";
   btn.disabled = true;
 
-  await new Promise(resolve => setTimeout(resolve, 50));
-
   try {
-    preparedFilesArray = [];
     const now = new Date();
-    const dateStr = formatDate(now);
-    const timeStr = `${String(now.getHours()).padStart(2,"0")}h${String(now.getMinutes()).padStart(2,"0")}`;
-    const names = selected.map(p => p.name).join(", ");
-
-    // Création du tableau de fichiers pour WhatsApp
+    const dateStr = now.toISOString().slice(0,10);
+    const timeStr = now.toTimeString().slice(0,5).replace(":", "h");
+    
+    let count = 0;
     for (const project of selected) {
       project.photoData.forEach((dataUrl, idx) => {
         if (!dataUrl) return;
         
-        // Convertir base64 en fichier binaire
-        const bin = atob(dataUrl.split(",")[1]);
-        const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-        
-        // Nom du fichier : Projet_Date_Heure_PhotoX.jpg
-        const filename = `${project.name}_${dateStr}_${timeStr}_Photo${String(idx+1).padStart(2,"0")}.jpg`;
-        
-        preparedFilesArray.push(new File([arr], filename, { type: "image/jpeg" }));
+        // Télécharger l'image dans la galerie du téléphone
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = `${project.name}_${dateStr}_${timeStr}_Photo${String(idx+1).padStart(2,"0")}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        count++;
       });
     }
 
-    // Ajouter un fichier texte avec les infos
-    const infoText = `TRANSFERT PHOTO PRO\nDate: ${now.toLocaleString()}\nProjets: ${selected.map(p=>p.name).join(", ")}`;
-    preparedFilesArray.push(new File([infoText], `INFO_${dateStr}_${timeStr}.txt`, { type: "text/plain" }));
+    // Préparer le texte pour WhatsApp
+    const infoText = `Photos du projet: ${selected.map(p=>p.name).join(", ")}\nDate: ${dateStr}\nHeure: ${timeStr}`;
+    window.currentShareText = infoText;
 
-    // Afficher le bouton de partage
+    // Copier automatiquement le texte dans le presse-papiers
+    await navigator.clipboard.writeText(infoText);
+
+    // Afficher le bouton WhatsApp
     document.getElementById("btnShareZip").style.display = "block";
-    btn.textContent = "✅ Photos Prêtes !";
+    document.getElementById("btnShareZip").textContent = "2. 📤 OUVRIR WHATSAPP";
+    
+    btn.textContent = "✅ Photos Téléchargées !";
     btn.disabled = false;
-    showMessage("sendMessage", t("msgPrepared", { names }), "success");
+    
+    alert(`${count} photos ont été enregistrées dans votre galerie.\n\nLe texte (Projet + Date) a été copié. Quand vous serez dans WhatsApp, faites un appui long dans la barre de texte et cliquez sur "Coller".`);
 
   } catch (error) {
-    console.error("Erreur détaillée :", error);
-    showMessage("sendMessage", "Erreur lors de la préparation : " + error.message, "error");
+    alert("Erreur : " + error.message);
     btn.textContent = originalText;
     btn.disabled = false;
   }
 }
 
-async function sharePhotos() {
-  if (preparedFilesArray.length === 0) return;
-  
-  if (navigator.canShare && navigator.canShare({ files: preparedFilesArray })) {
-    try {
-      await navigator.share({
-        files: preparedFilesArray,
-        title: 'PHOTO PRO',
-        text: `Voici les photos du projet`
-      });
-    } catch (e) { 
-      console.log("Partage annulé", e); 
-    }
-  } else {
-    alert("Votre navigateur ne supporte pas le partage de plusieurs fichiers. Utilisez Firefox ou Chrome à jour.");
-  }
+function sharePhotos() {
+  // Ouvre WhatsApp
+  window.open("https://api.whatsapp.com/send", "_blank");
 }
-
-/* ============== UTILS ============== */
-function showMessage(elementId, text, type = "info") {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-  el.textContent = text;
-  el.classList.remove("error", "success");
-  if (type === "error") el.classList.add("error");
-  if (type === "success") el.classList.add("success");
-  el.classList.add("show");
-  clearTimeout(el._timer);
-  el._timer = setTimeout(() => el.classList.remove("show"), 5000);
-}
-
-function escapeHTML(text) {
-  return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-/* ============== INIT ============== */
-function init() {
-  applyTranslations();
-  renderProjects();
-  updateTransferDateInfo();
-
-  setInterval(() => {
-    if (document.getElementById("sendScreen").classList.contains("active")) {
-      updateTransferDateInfo();
-    }
-  }, 1000);
-
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch(err => console.warn("SW fail:", err));
-    });
-  }
-}
-
-// Intercepter le bouton physique retour d'Android
-history.pushState(null, document.title, location.href);
-window.addEventListener('popstate', function () {
-  if (currentScreenId !== "homeScreen") {
-    if (currentScreenId === "cameraScreen") stopCamera();
-    showScreen("homeScreen");
-    history.pushState(null, document.title, location.href);
-  } else {
-    history.back();
-  }
-});
-
-init();
 </script>
 </body>
 </html>
