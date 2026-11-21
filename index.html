@@ -1,266 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
-  <link rel="manifest" href="manifest.json" />
-  <title>PHOTO PRO</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f1f3f5; color: #111827; }
-    button, input, select { font: inherit; }
-    .app { width: 100%; max-width: 430px; min-height: 100vh; margin: 0 auto; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
-    .header { padding: 20px; background: #111827; color: white; display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 24px; font-weight: 800; }
-    .lang-selector { background: #1e293b; color: #fff; border: 1px solid #475569; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 14px; }
-    .screen { display: none; padding: 20px; flex: 1; overflow-y: auto; }
-    .screen.active { display: block; }
-    .title { font-size: 22px; font-weight: 700; margin-bottom: 15px; }
-    
-    .input { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; outline: none; font-size: 16px; margin-bottom: 15px;}
-    .button { width: 100%; border: 0; border-radius: 12px; padding: 15px; margin-top: 10px; cursor: pointer; font-weight: 700; font-size: 15px; }
-    .primary { background: #2563eb; color: white; }
-    .secondary { background: #e5e7eb; color: #111827; }
-    .whatsapp-btn { background: #25D366; color: white; display: flex; justify-content: center; align-items: center; gap: 10px;}
-    
-    .projects { margin-top: 10px; }
-    .project { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; }
-    .project-name { font-weight: 700; }
-    .project-info { margin-top: 4px; color: #64748b; font-size: 12px; }
-    .photo-count { font-weight: 700; color: #2563eb; background: #e0f2fe; padding: 4px 8px; border-radius: 6px; }
-    
-    .camera-container { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #111827; margin-bottom: 10px; }
-    #video { width: 100%; height: 100%; object-fit: cover; display: none; }
-    .camera-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 40px; }
-    .main-capture-btn { width: 100%; height: 60px; border-radius: 12px; background: #ef4444; color: white; font-size: 18px; font-weight: bold; margin-bottom: 10px; border: none; }
-    .camera-controls { display: flex; gap: 10px; margin-bottom: 15px; }
-    
-    .gallery-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 10px;}
-    .photo-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-bottom: 20px; }
-    .photo-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 3px solid transparent; cursor: pointer;}
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-item.selected { border-color: #2563eb; }
-    .photo-checkbox { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; color: transparent; pointer-events: none; }
-    .photo-item.selected .photo-checkbox { background: #2563eb; color: white; }
-
-    .bottom-nav { display: flex; position: sticky; bottom: 0; background: white; border-top: 1px solid #e2e8f0; }
-    .nav-button { flex: 1; border: 0; background: white; padding: 14px 8px; cursor: pointer; color: #64748b; font-size: 12px; }
-    .nav-button.active { color: #2563eb; font-weight: 700; }
-    .nav-icon { display: block; font-size: 20px; margin-bottom: 4px; }
-
-    .photo-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; }
-    .photo-modal.show { display: flex; }
-    .photo-modal img { max-width: 100%; max-height: 80vh; object-fit: contain; }
-    .photo-modal .close-btn { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; background: none; border: none; }
-    
-    .flash-effect { position: absolute; inset: 0; background: white; opacity: 0; z-index: 10; pointer-events: none; transition: opacity 0.1s; }
-  </style>
-</head>
-<body>
-<div class="app">
-  <header class="header">
-    <div class="logo">PHOTO PRO</div>
-    <select id="langSelector" class="lang-selector" onchange="changeLanguage(this.value)">
-      <option value="en">EN</option>
-      <option value="fr">FR</option>
-      <option value="nl">NL</option>
-    </select>
-  </header>
-
-  <section id="homeScreen" class="screen active">
-    <div class="title">Mes projets</div>
-    <input type="text" id="searchInput" class="input" placeholder="🔍 Rechercher un projet..." oninput="renderProjects()" />
-    <button class="button primary" onclick="showScreen('newProjectScreen')">+ NOUVEAU PROJET</button>
-    <div class="projects"><div id="projectList"></div></div>
-  </section>
-
-  <section id="newProjectScreen" class="screen">
-    <div class="title">Nouveau projet</div>
-    <input id="projectInput" class="input" type="text" placeholder="Nom ou numéro de projet" />
-    <button class="button primary" onclick="createProject()">CRÉER ET OUVRIR</button>
-    <button class="button secondary" onclick="showScreen('homeScreen')">Retour</button>
-  </section>
-
-  <section id="cameraScreen" class="screen">
-    <div class="title" id="currentProjectName">Projet</div>
-    
-    <div class="camera-container">
-      <video id="video" autoplay playsinline muted></video>
-      <div id="cameraPlaceholder" class="camera-placeholder">📷</div>
-      <div id="flashEffect" class="flash-effect"></div>
-    </div>
-
-    <button class="main-capture-btn" onclick="takePhoto()">📸 PRENDRE LA PHOTO</button>
-
-    <div class="camera-controls">
-      <button class="button secondary" onclick="startCamera()">OUVRIR CAMÉRA</button>
-      <button class="button secondary" onclick="flipCamera()">🔄 BASCULER</button>
-    </div>
-
-    <div class="gallery-header">
-      <div style="font-weight:700;">Galerie du projet</div>
-      <div>
-        <button onclick="toggleSelectAll()" style="background:none; border:none; color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline;">Tout sélectionner</button>
-        <span id="selectedCount" style="color:#2563eb; font-weight:bold; margin-left:10px;">0</span>
-      </div>
-    </div>
-    
-    <div id="photoGallery" class="photo-gallery"></div>
-    
-    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp(event)">📤 ENVOYER SUR WHATSAPP</button>
-    <button class="button secondary" onclick="finishProject()">TERMINER LE PROJET</button>
-  </section>
-
-  <nav class="bottom-nav">
-    <button class="nav-button active" data-screen="homeScreen" onclick="showScreen('homeScreen')">
-      <span class="nav-icon">🏠</span>Accueil
-    </button>
-    <button class="nav-button" data-screen="newProjectScreen" onclick="showScreen('newProjectScreen')">
-      <span class="nav-icon">➕</span>Projet
-    </button>
-  </nav>
-</div>
-
-<div id="photoModal" class="photo-modal">
-  <button class="close-btn" onclick="document.getElementById('photoModal').classList.remove('show')">✕</button>
-  <img id="modalImage" src="" />
-</div>
-
-<script>
-/* ============== TRADUCTIONS ============== */
-const translations = {
-  en: { project: "Project", date: "Date", at: "at" },
-  fr: { project: "Projet", date: "Date", at: "à" },
-  nl: { project: "Project", date: "Datum", at: "om" }
-};
-let currentLang = localStorage.getItem("photo_pro_lang") || "fr";
-
-function t(key) { return translations[currentLang][key] || translations['en'][key]; }
-
-function changeLanguage(lang) {
-  currentLang = lang;
-  localStorage.setItem("photo_pro_lang", lang);
-  document.getElementById("langSelector").value = lang;
-}
-
-/* ============== ETAT ============== */
-let projects = JSON.parse(localStorage.getItem("photo_pro_projects") || "[]");
-let currentProjectId = null;
-let cameraStream = null;
-let cameraFacing = "environment";
-let selectedPhotos = new Set();
-
-function saveProjects() { localStorage.setItem("photo_pro_projects", JSON.stringify(projects)); }
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  if (id === "homeScreen") renderProjects();
-}
-
-function renderProjects() {
-  const container = document.getElementById("projectList");
-  const term = document.getElementById("searchInput").value.toLowerCase();
-  container.innerHTML = "";
-  projects.filter(p => p.name.toLowerCase().includes(term)).forEach(p => {
-    const el = document.createElement("div");
-    el.className = "project";
-    el.onclick = () => { currentProjectId = p.id; openProject(); };
-    el.innerHTML = `<div><div class="project-name">${p.name}</div><div class="project-info">${p.photos} photos</div></div><div class="photo-count">➔</div>`;
-    container.appendChild(el);
-  });
-}
-
-function createProject() {
-  const name = document.getElementById("projectInput").value.trim();
-  if (!name) return;
-  const project = { id: Date.now(), name: name, photos: 0, photoData: [] };
-  projects.unshift(project);
-  saveProjects();
-  currentProjectId = project.id;
-  openProject();
-}
-
-async function openProject() {
-  const p = projects.find(x => x.id === currentProjectId);
-  document.getElementById("currentProjectName").textContent = p.name;
-  selectedPhotos.clear();
-  renderGallery(p);
-  showScreen("cameraScreen");
-  if (!cameraStream) startCamera();
-}
-
-async function startCamera() {
-  try {
-    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: cameraFacing } }, audio: false });
-    document.getElementById("video").srcObject = cameraStream;
-    document.getElementById("video").style.display = "block";
-    document.getElementById("cameraPlaceholder").style.display = "none";
-  } catch (e) { alert("Erreur Caméra: " + e.name); }
-}
-
-function flipCamera() { cameraFacing = cameraFacing === "environment" ? "user" : "environment"; startCamera(); }
-
-function takePhoto() {
-  const p = projects.find(x => x.id === currentProjectId);
-  const video = document.getElementById("video");
-  if (!cameraStream || !p) return;
-
-  const flash = document.getElementById("flashEffect");
-  flash.style.opacity = "0.8";
-  setTimeout(() => flash.style.opacity = "0", 150);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  const ctx = canvas.getContext("2d");
-  if (cameraFacing === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-  ctx.drawImage(video, 0, 0);
-
-  p.photoData.push(canvas.toDataURL("image/jpeg", 0.7));
-  p.photos = p.photoData.length;
-  saveProjects();
-  renderGallery(p);
-}
-
-function renderGallery(p) {
-  const gallery = document.getElementById("photoGallery");
-  gallery.innerHTML = "";
-  
-  p.photoData.forEach((url, index) => {
-    const div = document.createElement("div");
-    div.className = "photo-item" + (selectedPhotos.has(index) ? " selected" : "");
-    div.onclick = () => {
-      if (selectedPhotos.has(index)) selectedPhotos.delete(index);
-      else selectedPhotos.add(index);
-      renderGallery(p);
-    };
-    div.ondblclick = (e) => {
-      e.preventDefault();
-      document.getElementById("modalImage").src = url;
-      document.getElementById("photoModal").classList.add("show");
-    };
-    div.innerHTML = `<img src="${url}"><div class="photo-checkbox">✓</div>`;
-    gallery.appendChild(div);
-  });
-
-  document.getElementById("selectedCount").textContent = `${selectedPhotos.size} sélectionnée(s)`;
-}
-
-function toggleSelectAll() {
-  const p = projects.find(x => x.id === currentProjectId);
-  if (selectedPhotos.size === p.photoData.length) selectedPhotos.clear();
-  else p.photoData.forEach((_, i) => selectedPhotos.add(i));
-  renderGallery(p);
-}
-
-function finishProject() {
-  if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-  cameraStream = null;
-  showScreen("homeScreen");
-}
-
-/* ============== PARTAGE DIRECT VERS WHATSAPP (MULTI-FICHIERS) ============== */
 async function shareSelectedPhotosToWhatsApp(event) {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
@@ -272,7 +9,6 @@ async function shareSelectedPhotosToWhatsApp(event) {
 
   try {
     const now = new Date();
-    // Formatage de la date selon la langue
     const optionsDate = { year: 'numeric', month: '2-digit', day: '2-digit' };
     const dateStr = now.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang, optionsDate).replace(/\//g, '-');
     const timeStr = now.toTimeString().slice(0,5).replace(":", "h");
@@ -292,31 +28,26 @@ async function shareSelectedPhotosToWhatsApp(event) {
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
-    // Texte traduit
+    // Préparer le texte et le copier dans le presse-papiers
     const shareText = `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
+    await navigator.clipboard.writeText(shareText);
 
+    // IMPORTANT : On envoie UNIQUEMENT les fichiers, sans le champ 'text'
     const shareData = {
-      files: files,
-      title: `${t('project')} ${p.name}`,
-      text: shareText
+      files: files
+      // 'text' et 'title' sont retirés pour éviter le bug de WhatsApp
     };
 
-    // Vérification et envoi direct
     if (navigator.canShare && navigator.canShare(shareData)) {
       await navigator.share(shareData);
-    } else {
-      // Solution de secours : Envoi groupé via ZIP si le téléphone refuse le multi-partage
-      // (Android limite souvent à 5 photos, le ZIP permet de tout envoyer d'un coup)
-      alert("Votre téléphone ne supporte pas l'envoi de plusieurs photos d'un coup. Un fichier ZIP va être créé pour les envoyer.");
-      // La fonction createZipBlob est appelée ici pour envoyer le tout
-      const zipBlob = await createZipBlob(files);
-      const zipFile = new File([zipBlob], `${p.name}_${dateStr}_${timeStr}.zip`, { type: "application/zip" });
       
-      await navigator.share({
-        files: [zipFile],
-        title: `${t('project')} ${p.name}`,
-        text: shareText
-      });
+      // Message après le partage pour rappeler de coller le texte
+      setTimeout(() => {
+        alert("Les photos ont été envoyées.\n\nLe texte (Projet + Date) a été copié. Dans WhatsApp, faites un appui long dans la barre de message et cliquez sur 'Coller'.");
+      }, 500);
+      
+    } else {
+      alert("Votre téléphone ne supporte pas le partage direct de plusieurs fichiers.");
     }
 
   } catch (e) {
@@ -329,60 +60,3 @@ async function shareSelectedPhotosToWhatsApp(event) {
     btn.disabled = false;
   }
 }
-
-/* ============== FONCTION ZIP DE SECOURS ============== */
-async function createZipBlob(files) {
-  const chunks = [];
-  const encoder = new TextEncoder();
-  const centralDir = [];
-  let offset = 0;
-
-  function crc32(data) {
-    let crc = 0xFFFFFFFF;
-    const table = crc32.table || (crc32.table = (() => {
-      const t = new Uint32Array(256);
-      for (let i = 0; i < 256; i++) { let c = i; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[i] = c; }
-      return t;
-    })());
-    for (let i = 0; i < data.length; i++) crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
-    return (crc ^ 0xFFFFFFFF) >>> 0;
-  }
-
-  for (const file of files) {
-    const nameBytes = encoder.encode(file.name);
-    const data = new Uint8Array(await file.arrayBuffer());
-    const crc = crc32(data);
-    const now = new Date();
-    const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
-    const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
-
-    const lh = new Uint8Array(30 + nameBytes.length);
-    const lv = new DataView(lh.buffer);
-    lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint16(6, 0, true); lv.setUint16(8, 0, true); lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true); lv.setUint32(14, crc, true); lv.setUint32(18, data.length, true); lv.setUint32(22, data.length, true); lv.setUint16(26, nameBytes.length, true); lh.set(nameBytes, 30);
-    chunks.push(lh, data);
-    centralDir.push({ nameBytes, crc, size: data.length, offset, dosTime, dosDate });
-    offset += lh.length + data.length;
-  }
-
-  const cdStart = offset;
-  for (const entry of centralDir) {
-    const ch = new Uint8Array(46 + entry.nameBytes.length);
-    const cv = new DataView(ch.buffer);
-    cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0, true); cv.setUint16(10, 0, true); cv.setUint16(12, entry.dosTime, true); cv.setUint16(14, entry.dosDate, true); cv.setUint32(16, entry.crc, true); cv.setUint32(20, entry.size, true); cv.setUint32(24, entry.size, true); cv.setUint16(28, entry.nameBytes.length, true); cv.setUint32(42, entry.offset, true); ch.set(entry.nameBytes, 46);
-    chunks.push(ch);
-    offset += ch.length;
-  }
-
-  const eocd = new Uint8Array(22);
-  const ev = new DataView(eocd.buffer);
-  ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, centralDir.length, true); ev.setUint16(10, centralDir.length, true); ev.setUint32(12, offset - cdStart, true); ev.setUint32(16, cdStart, true);
-  chunks.push(eocd);
-  return new Blob(chunks, { type: "application/zip" });
-}
-
-// Initialisation
-document.getElementById("langSelector").value = currentLang;
-renderProjects();
-</script>
-</body>
-</html>
