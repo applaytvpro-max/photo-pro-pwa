@@ -66,9 +66,7 @@
     .send-project-name { font-weight: 700; }
     .send-project-meta { color: #64748b; font-size: 12px; margin-top: 4px; }
     .transfer-options { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-    .transfer-options label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; cursor: pointer; }
-    .transfer-options input[type="radio"] { width: 18px; height: 18px; }
-    .transfer-options .date-info { font-size: 13px; color: #64748b; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+    .transfer-options .date-info { font-size: 13px; color: #64748b; margin-top: 8px; }
     
     /* NAV & UTILS */
     .bottom-nav { display: flex; position: sticky; bottom: 0; background: white; border-top: 1px solid #e2e8f0; }
@@ -116,7 +114,6 @@
     <div class="title" data-i18n="myProjects">My projects</div>
     <div class="description" data-i18n="homeDesc">Create a project, take photos and keep each site separate.</div>
     
-    <!-- ZONE DE RECHERCHE AJOUTÉE ICI -->
     <input type="text" id="searchInput" class="input" placeholder="🔍 Rechercher par nom ou date..." oninput="renderProjects()" />
     
     <button class="button primary" onclick="showNewProject()" data-i18n="newProject">+ NEW PROJECT</button>
@@ -150,7 +147,6 @@
       <div id="flashEffect" class="flash-effect"></div>
     </div>
 
-    <!-- BOUTON ROUGE DE CAPTURE -->
     <button class="main-capture-btn" onclick="takePhoto()">📸 PRENDRE LA PHOTO</button>
 
     <div class="camera-controls">
@@ -158,7 +154,6 @@
       <button class="button flip-btn" onclick="flipCamera()" data-i18n="flipCamera">🔄 BASCULER</button>
     </div>
 
-    <!-- GALERIE PHOTOS -->
     <div class="gallery-title">Photos (<span id="galleryCount">0</span>)</div>
     <div id="photoGallery" class="photo-gallery"></div>
 
@@ -173,23 +168,23 @@
 
   <!-- SEND -->
   <section id="sendScreen" class="screen">
-    <div class="title" data-i18n="send">Send</div>
-    <div class="description" data-i18n="sendDesc">Select the projects you want to transfer.</div>
+    <div class="title" data-i18n="send">Envoi vers WhatsApp</div>
+    <div class="description" data-i18n="sendDesc">Sélectionnez les projets pour les envoyer.</div>
+    
     <div class="select-all">
       <input type="checkbox" id="selectAll" onchange="toggleAllProjects()" />
-      <label for="selectAll" data-i18n="selectAll">Select all projects</label>
+      <label for="selectAll" data-i18n="selectAll">Sélectionner tous les projets</label>
     </div>
+    
     <div id="sendProjectList"></div>
+    
     <div class="transfer-options">
-      <div style="font-weight:700; margin-bottom:10px;" data-i18n="transferOptions">Transfer options</div>
-      <label><input type="radio" name="zipMode" value="zip" checked /> <span data-i18n="asZip">📦 Send as ZIP file</span></label>
-      <label><input type="radio" name="zipMode" value="nozip" /> <span data-i18n="asFiles">📁 Send without ZIP (separate files)</span></label>
       <div class="date-info" id="transferDateInfo"></div>
     </div>
     
     <!-- DOUBLE BOUTON POUR LE TRANSFERT -->
-    <button id="btnCreateZip" class="button primary" onclick="createTransferFile()">1. 📦 PRÉPARER LE TRANSFERT</button>
-    <button id="btnShareZip" class="button success" onclick="shareTransferFile()" style="display:none;">2. 📤 PARTAGER (WhatsApp, etc.)</button>
+    <button id="btnCreateZip" class="button primary" onclick="preparePhotos()">1. 📦 PRÉPARER LES PHOTOS</button>
+    <button id="btnShareZip" class="button success" onclick="sharePhotos()" style="display:none;">2. 📤 ENVOYER SUR WHATSAPP</button>
     
     <div id="sendMessage" class="message"></div>
   </section>
@@ -203,7 +198,7 @@
       <span class="nav-icon">➕</span><span data-i18n="navProject">Project</span>
     </button>
     <button class="nav-button" data-screen="sendScreen" onclick="showSendScreen()">
-      <span class="nav-icon">📤</span><span data-i18n="navSend">Send</span>
+      <span class="nav-icon">📤</span><span data-i18n="navSend">Envoi</span>
     </button>
   </nav>
 </div>
@@ -233,15 +228,9 @@ const translations = {
     flipCamera: "🔄 FLIP",
     finishProject: "✓ FINISH PROJECT",
     changeProject: "Change project",
-    send: "Send",
-    sendDesc: "Select the projects you want to transfer.",
+    send: "Send to WhatsApp",
+    sendDesc: "Select the projects to send.",
     selectAll: "Select all projects",
-    transferOptions: "Transfer options",
-    asZip: "📦 Send as ZIP file",
-    asFiles: "📁 Send without ZIP (separate files)",
-    prepareTransfer: "1. 📦 PREPARE TRANSFER",
-    shareTransfer: "2. 📤 SHARE (WhatsApp, etc.)",
-    share: "📤 SHARE",
     navHome: "Home",
     navProject: "Project",
     navSend: "Send",
@@ -255,13 +244,11 @@ const translations = {
     msgPhotoSaved: "Photo {n} saved.",
     msgPhotoDemo: "Photo {n} saved in {name}.",
     msgSelectOne: "Select at least one project.",
-    msgPrepared: "Transfer prepared for: {names}",
-    msgPreparedZip: "ZIP prepared for: {names}",
+    msgPrepared: "Photos ready: {names}",
     msgShareUnsupported: "System sharing is not available in this browser.",
-    msgShareOpened: "Share menu opened.",
     msgNoProjects: "No projects yet.",
     msgNoProjectsAvailable: "No projects available.",
-    msgLoading: "Creating file... Please wait.",
+    msgLoading: "Preparing photos... Please wait.",
     transferDate: "Transfer date and time: {date}",
     diagHttps: "Page is not served over HTTPS. The camera API only works on HTTPS or localhost.",
     diagApiMissing: "navigator.mediaDevices is not available. Use HTTPS or a recent browser.",
@@ -287,15 +274,9 @@ const translations = {
     flipCamera: "🔄 BASCULER",
     finishProject: "✓ TERMINER LE PROJET",
     changeProject: "Changer de projet",
-    send: "Envoi",
-    sendDesc: "Sélectionne les projets que tu veux transférer.",
+    send: "Envoi vers WhatsApp",
+    sendDesc: "Sélectionnez les projets pour les envoyer.",
     selectAll: "Sélectionner tous les projets",
-    transferOptions: "Options de transfert",
-    asZip: "📦 Envoyer en fichier ZIP",
-    asFiles: "📁 Envoyer sans ZIP (fichiers séparés)",
-    prepareTransfer: "1. 📦 PRÉPARER LE TRANSFERT",
-    shareTransfer: "2. 📤 PARTAGER (WhatsApp, etc.)",
-    share: "📤 PARTAGER",
     navHome: "Accueil",
     navProject: "Projet",
     navSend: "Envoi",
@@ -309,13 +290,11 @@ const translations = {
     msgPhotoSaved: "Photo {n} enregistrée.",
     msgPhotoDemo: "Photo {n} enregistrée dans {name}.",
     msgSelectOne: "Sélectionne au moins un projet.",
-    msgPrepared: "Transfert préparé pour : {names}",
-    msgPreparedZip: "ZIP préparé pour : {names}",
+    msgPrepared: "Photos prêtes : {names}",
     msgShareUnsupported: "Le partage système n'est pas disponible dans ce navigateur.",
-    msgShareOpened: "Menu de partage ouvert.",
     msgNoProjects: "Aucun projet pour le moment.",
     msgNoProjectsAvailable: "Aucun projet disponible.",
-    msgLoading: "Création du fichier... Veuillez patienter.",
+    msgLoading: "Préparation des photos... Veuillez patienter.",
     transferDate: "Date et heure du transfert : {date}",
     diagHttps: "La page n'est pas servie en HTTPS. L'API caméra ne fonctionne qu'en HTTPS ou localhost.",
     diagApiMissing: "navigator.mediaDevices indisponible. Utilise HTTPS ou un navigateur récent.",
@@ -341,15 +320,9 @@ const translations = {
     flipCamera: "🔄 WISSELEN",
     finishProject: "✓ PROJECT VOLTOOIEN",
     changeProject: "Project wijzigen",
-    send: "Verzenden",
-    sendDesc: "Selecteer de projecten die je wilt overdragen.",
+    send: "Verzenden naar WhatsApp",
+    sendDesc: "Selecteer de projecten om te verzenden.",
     selectAll: "Alle projecten selecteren",
-    transferOptions: "Overdrachtsopties",
-    asZip: "📦 Verzenden als ZIP-bestand",
-    asFiles: "📁 Verzenden zonder ZIP (aparte bestanden)",
-    prepareTransfer: "1. 📦 OVERDRACHT VOORBEREIDEN",
-    shareTransfer: "2. 📤 DELEN (WhatsApp, enz.)",
-    share: "📤 DELEN",
     navHome: "Home",
     navProject: "Project",
     navSend: "Verzenden",
@@ -363,13 +336,11 @@ const translations = {
     msgPhotoSaved: "Foto {n} opgeslagen.",
     msgPhotoDemo: "Foto {n} opgeslagen in {name}.",
     msgSelectOne: "Selecteer minstens één project.",
-    msgPrepared: "Overdracht voorbereid voor: {names}",
-    msgPreparedZip: "ZIP voorbereid voor: {names}",
+    msgPrepared: "Foto's klaar: {names}",
     msgShareUnsupported: "Systeem delen is niet beschikbaar in deze browser.",
-    msgShareOpened: "Deelmenu geopend.",
     msgNoProjects: "Nog geen projecten.",
     msgNoProjectsAvailable: "Geen projecten beschikbaar.",
-    msgLoading: "Bestand aanmaken... Even geduld.",
+    msgLoading: "Foto's voorbereiden... Even geduld.",
     transferDate: "Datum en tijd van overdracht: {date}",
     diagHttps: "Pagina wordt niet via HTTPS geleverd. De camera-API werkt alleen via HTTPS of localhost.",
     diagApiMissing: "navigator.mediaDevices is niet beschikbaar. Gebruik HTTPS of een recente browser.",
@@ -383,8 +354,7 @@ const translations = {
 
 let currentLang = localStorage.getItem("photo_pro_lang") || "en";
 let currentScreenId = "homeScreen";
-let lastGeneratedBlob = null;
-let lastGeneratedFilename = null;
+let preparedFilesArray = []; // Tableau pour stocker les photos en attente d'envoi
 
 function t(key, vars = {}) {
   let str = translations[currentLang]?.[key] || translations.en[key] || key;
@@ -415,7 +385,7 @@ const STORAGE_KEY = "photo_pro_projects";
 let projects = loadProjects();
 let currentProjectId = null;
 let cameraStream = null;
-let cameraFacing = "environment"; // <--- CAMERA ARRIERE PAR DEFAUT
+let cameraFacing = "environment";
 
 function loadProjects() {
   try {
@@ -563,7 +533,7 @@ function closePhotoModal() {
   document.getElementById("photoModal").classList.remove("show");
 }
 
-/* ============== CAMERA & DIAGNOSTIC ============== */
+/* ============== CAMERA ============== */
 function diagReset() {
   const el = document.getElementById("cameraDiag");
   const ul = document.getElementById("diagList");
@@ -585,17 +555,8 @@ async function startCamera() {
   const video = document.getElementById("video");
   const placeholder = document.getElementById("cameraPlaceholder");
 
-  if (!window.isSecureContext) {
-    diagAdd("diagHttps");
-    showMessage("cameraMessage", t("msgCameraError"), "error");
-    return;
-  }
-
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    diagAdd("diagApiMissing");
-    showMessage("cameraMessage", t("msgCameraError"), "error");
-    return;
-  }
+  if (!window.isSecureContext) { diagAdd("diagHttps"); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { diagAdd("diagApiMissing"); return; }
 
   try {
     if (cameraStream) stopCamera();
@@ -607,20 +568,14 @@ async function startCamera() {
     video.style.display = "block";
     placeholder.style.display = "none";
     document.getElementById("cameraButton").textContent = "CAMERA ACTIVE";
-    showMessage("cameraMessage",
-      cameraFacing === "user" ? t("msgCameraFront") : t("msgCameraBack"), "success");
   } catch (error) {
     console.error(error.name, error.message);
     showMessage("cameraMessage", t("msgCameraError"), "error");
     switch (error.name) {
-      case "NotAllowedError":
-      case "PermissionDeniedError": diagAdd("diagNotAllowed"); break;
-      case "NotFoundError":
-      case "DevicesNotFoundError": diagAdd("diagNotFound"); break;
-      case "NotReadableError":
-      case "TrackStartError": diagAdd("diagNotReadable"); break;
-      case "OverconstrainedError":
-      case "ConstraintNotSatisfiedError": diagAdd("diagOverconstrained"); break;
+      case "NotAllowedError": case "PermissionDeniedError": diagAdd("diagNotAllowed"); break;
+      case "NotFoundError": case "DevicesNotFoundError": diagAdd("diagNotFound"); break;
+      case "NotReadableError": case "TrackStartError": diagAdd("diagNotReadable"); break;
+      case "OverconstrainedError": case "ConstraintNotSatisfiedError": diagAdd("diagOverconstrained"); break;
       default: diagAdd("diagUnknown");
     }
   }
@@ -635,13 +590,11 @@ function stopCamera() {
 async function flipCamera() {
   cameraFacing = cameraFacing === "user" ? "environment" : "user";
   if (cameraStream) { stopCamera(); await startCamera(); }
-  else showMessage("cameraMessage",
-    cameraFacing === "user" ? t("msgCameraFront") : t("msgCameraBack"), "success");
 }
 
 function takePhoto() {
   const project = getCurrentProject();
-  if (!project) { showMessage("cameraMessage", t("msgNoProject"), "error"); return; }
+  if (!project) return;
   const video = document.getElementById("video");
 
   const flash = document.getElementById("flashEffect");
@@ -653,7 +606,6 @@ function takePhoto() {
     project.photoData.push(null);
     saveProjects();
     renderGallery(project);
-    showMessage("cameraMessage", t("msgPhotoDemo", { n: project.photos, name: project.name }), "success");
     return;
   }
 
@@ -667,18 +619,14 @@ function takePhoto() {
 
   project.photos += 1;
   project.photoData.push(dataUrl);
-  try {
-    saveProjects();
-    renderGallery(project);
-    showMessage("cameraMessage", t("msgPhotoSaved", { n: project.photos }), "success");
-  } catch (e) {
-    showMessage("cameraMessage", "Storage full. Reduce photo count.", "error");
-  }
+  saveProjects();
+  renderGallery(project);
+  showMessage("cameraMessage", t("msgPhotoSaved", { n: project.photos }), "success");
 }
 
 function finishProject() { stopCamera(); showScreen("homeScreen"); renderProjects(); }
 
-/* ============== RENDER LISTS ============== */
+/* ============== RENDER SEND ============== */
 function showSendScreen() { showScreen("sendScreen"); renderSendProjects(); updateTransferDateInfo(); }
 
 function renderSendProjects() {
@@ -719,104 +667,9 @@ function getSelectedProjects() {
   const checked = Array.from(document.querySelectorAll(".project-check:checked"));
   return checked.map(cb => projects.find(p => p.id === Number(cb.value))).filter(Boolean);
 }
-function getZipMode() {
-  const radio = document.querySelector('input[name="zipMode"]:checked');
-  return radio ? radio.value : "zip";
-}
 
-/* ============== ZIP CREATION ============== */
-async function createZipBlob(files) {
-  const chunks = [];
-  const encoder = new TextEncoder();
-  const centralDir = [];
-  let offset = 0;
-
-  function crc32(data) {
-    let crc = 0xFFFFFFFF;
-    const table = crc32.table || (crc32.table = (() => {
-      const t = new Uint32Array(256);
-      for (let i = 0; i < 256; i++) {
-        let c = i;
-        for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
-        t[i] = c;
-      }
-      return t;
-    })());
-    for (let i = 0; i < data.length; i++) crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
-    return (crc ^ 0xFFFFFFFF) >>> 0;
-  }
-
-  for (const file of files) {
-    const nameBytes = encoder.encode(file.name);
-    const data = file.data;
-    const crc = crc32(data);
-    const now = new Date();
-    const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
-    const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
-
-    const localHeader = new Uint8Array(30 + nameBytes.length);
-    const lh = new DataView(localHeader.buffer);
-    lh.setUint32(0, 0x04034b50, true);
-    lh.setUint16(4, 20, true);
-    lh.setUint16(6, 0, true);
-    lh.setUint16(8, 0, true);
-    lh.setUint16(10, dosTime, true);
-    lh.setUint16(12, dosDate, true);
-    lh.setUint32(14, crc, true);
-    lh.setUint32(18, data.length, true);
-    lh.setUint32(22, data.length, true);
-    lh.setUint16(26, nameBytes.length, true);
-    lh.setUint16(28, 0, true);
-    localHeader.set(nameBytes, 30);
-
-    chunks.push(localHeader, data);
-    centralDir.push({ nameBytes, crc, size: data.length, offset, dosTime, dosDate });
-    offset += localHeader.length + data.length;
-  }
-
-  const cdStart = offset;
-  for (const entry of centralDir) {
-    const cdHeader = new Uint8Array(46 + entry.nameBytes.length);
-    const cd = new DataView(cdHeader.buffer);
-    cd.setUint32(0, 0x02014b50, true);
-    cd.setUint16(4, 20, true);
-    cd.setUint16(6, 20, true);
-    cd.setUint16(8, 0, true);
-    cd.setUint16(10, 0, true);
-    cd.setUint16(12, entry.dosTime, true);
-    cd.setUint16(14, entry.dosDate, true);
-    cd.setUint32(16, entry.crc, true);
-    cd.setUint32(20, entry.size, true);
-    cd.setUint32(24, entry.size, true);
-    cd.setUint16(28, entry.nameBytes.length, true);
-    cd.setUint32(42, entry.offset, true);
-    cdHeader.set(entry.nameBytes, 46);
-    chunks.push(cdHeader);
-    offset += cdHeader.length;
-  }
-
-  const cdSize = offset - cdStart;
-  const eocd = new Uint8Array(22);
-  const ev = new DataView(eocd.buffer);
-  ev.setUint32(0, 0x06054b50, true);
-  ev.setUint16(8, centralDir.length, true);
-  ev.setUint16(10, centralDir.length, true);
-  ev.setUint32(12, cdSize, true);
-  ev.setUint32(16, cdStart, true);
-  chunks.push(eocd);
-  return new Blob(chunks, { type: "application/zip" });
-}
-
-function dataURLToUint8Array(dataURL) {
-  const base64 = dataURL.split(",")[1];
-  const bin = atob(base64);
-  const arr = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-  return arr;
-}
-
-/* ============== TRANSFER & SHARE ============== */
-async function createTransferFile() {
+/* ============== PREPARATION ET PARTAGE WHATSAPP ============== */
+async function preparePhotos() {
   const selected = getSelectedProjects();
   if (selected.length === 0) {
     showMessage("sendMessage", t("msgSelectOne"), "error");
@@ -831,106 +684,62 @@ async function createTransferFile() {
   await new Promise(resolve => setTimeout(resolve, 50));
 
   try {
-    const mode = getZipMode();
+    preparedFilesArray = [];
     const now = new Date();
-    const stamp = `${formatDate(now)}_${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}`;
-    const names = selected.map(p => p.folderName).join(", ");
+    const dateStr = formatDate(now);
+    const timeStr = `${String(now.getHours()).padStart(2,"0")}h${String(now.getMinutes()).padStart(2,"0")}`;
+    const names = selected.map(p => p.name).join(", ");
 
-    let blob, filename;
-
-    if (mode === "zip") {
-      const root = `TRANSFERT_${stamp}`;
-      const files = [];
-      const metadata = {
-        generated: now.toISOString(),
-        transferDate: formatDate(now),
-        transferTime: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`,
-        projects: selected.map(p => ({ name: p.name, folder: p.folderName, photos: p.photos }))
-      };
-      files.push({
-        name: `${root}/_INFO/transfer_info.json`,
-        data: new TextEncoder().encode(JSON.stringify(metadata, null, 2))
+    // Création du tableau de fichiers pour WhatsApp
+    for (const project of selected) {
+      project.photoData.forEach((dataUrl, idx) => {
+        if (!dataUrl) return;
+        
+        // Convertir base64 en fichier binaire
+        const bin = atob(dataUrl.split(",")[1]);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        
+        // Nom du fichier : Projet_Date_Heure_PhotoX.jpg
+        const filename = `${project.name}_${dateStr}_${timeStr}_Photo${String(idx+1).padStart(2,"0")}.jpg`;
+        
+        preparedFilesArray.push(new File([arr], filename, { type: "image/jpeg" }));
       });
-      for (const project of selected) {
-        const projectFolder = `${root}/${project.folderName}`;
-        files.push({
-          name: `${projectFolder}/projet_info.txt`,
-          data: new TextEncoder().encode(
-            `Project: ${project.name}\nFolder: ${project.folderName}\nPhotos: ${project.photos}\nDate: ${project.date}\nTime: ${project.time}\n`
-          )
-        });
-        project.photoData.forEach((dataUrl, idx) => {
-          if (!dataUrl) return;
-          files.push({
-            name: `${projectFolder}/photo_${String(idx+1).padStart(3,"0")}.jpg`,
-            data: dataURLToUint8Array(dataUrl)
-          });
-        });
-      }
-      blob = await createZipBlob(files);
-      filename = `PHOTO_PRO_${stamp}.zip`;
-    } else {
-      const metadata = {
-        transferDate: formatDate(now),
-        transferTime: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`,
-        generated: now.toISOString(),
-        projects: selected.map(p => ({ name: p.name, folder: p.folderName, photos: p.photos, date: p.date, time: p.time }))
-      };
-      blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
-      filename = `PHOTO_PRO_${stamp}_info.json`;
     }
 
-    lastGeneratedBlob = blob;
-    lastGeneratedFilename = filename;
+    // Ajouter un fichier texte avec les infos
+    const infoText = `TRANSFERT PHOTO PRO\nDate: ${now.toLocaleString()}\nProjets: ${selected.map(p=>p.name).join(", ")}`;
+    preparedFilesArray.push(new File([infoText], `INFO_${dateStr}_${timeStr}.txt`, { type: "text/plain" }));
 
     // Afficher le bouton de partage
     document.getElementById("btnShareZip").style.display = "block";
-    
-    btn.textContent = "✅ Fichier prêt !";
+    btn.textContent = "✅ Photos Prêtes !";
     btn.disabled = false;
-    showMessage("sendMessage", t("msgPreparedZip", { names }), "success");
+    showMessage("sendMessage", t("msgPrepared", { names }), "success");
 
   } catch (error) {
     console.error("Erreur détaillée :", error);
-    showMessage("sendMessage", "Erreur lors de la création : " + error.message, "error");
+    showMessage("sendMessage", "Erreur lors de la préparation : " + error.message, "error");
     btn.textContent = originalText;
     btn.disabled = false;
   }
 }
 
-async function shareTransferFile() {
-  if (!lastGeneratedBlob) return;
+async function sharePhotos() {
+  if (preparedFilesArray.length === 0) return;
   
-  const file = new File([lastGeneratedBlob], lastGeneratedFilename, { type: lastGeneratedBlob.type });
-
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  if (navigator.canShare && navigator.canShare({ files: preparedFilesArray })) {
     try {
       await navigator.share({
-        files: [file],
-        title: 'Transfert PHOTO PRO',
-        text: `Transfert du ${new Date().toLocaleDateString()}`
+        files: preparedFilesArray,
+        title: 'PHOTO PRO',
+        text: `Voici les photos du projet`
       });
-      showMessage("sendMessage", "Partage ouvert avec succès.", "success");
     } catch (e) { 
       console.log("Partage annulé", e); 
-      // Fallback téléchargement
-      const url = URL.createObjectURL(lastGeneratedBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = lastGeneratedFilename;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
     }
   } else {
-    const url = URL.createObjectURL(lastGeneratedBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = lastGeneratedFilename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-    showMessage("sendMessage", "Téléchargement direct (le partage n'est pas supporté).", "success");
+    alert("Votre navigateur ne supporte pas le partage de plusieurs fichiers. Utilisez Firefox ou Chrome à jour.");
   }
 }
 
@@ -948,9 +757,7 @@ function showMessage(elementId, text, type = "info") {
 }
 
 function escapeHTML(text) {
-  return String(text)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 /* ============== INIT ============== */
@@ -967,9 +774,7 @@ function init() {
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js")
-        .then(reg => console.log("SW registered:", reg.scope))
-        .catch(err => console.warn("SW registration failed:", err));
+      navigator.serviceWorker.register("sw.js").catch(err => console.warn("SW fail:", err));
     });
   }
 }
