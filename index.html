@@ -41,15 +41,14 @@
     .camera-status { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; color: white; font-size: 12px; z-index: 2; }
     .camera-project { background: rgba(0,0,0,0.55); padding: 7px 10px; border-radius: 20px; }
     .camera-indicator { background: #16a34a; padding: 7px 10px; border-radius: 20px; }
-    
-    /* BOUTON CAPTURE EN HAUT */
-    .capture-btn-container { display: flex; justify-content: center; margin-bottom: 15px; }
-    .capture-btn { width: 70px; height: 70px; border-radius: 50%; background: #ef4444; border: 4px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; transition: transform 0.1s; }
-    .capture-btn:active { transform: scale(0.95); background: #dc2626; }
 
     .camera-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
     .camera-controls .button { margin-top: 0; flex: 1; min-width: 120px; }
     .flip-btn { background: #f59e0b; color: #fff; }
+
+    /* BOUTON CAPTURE PRINCIPAL (ROUGE) */
+    .main-capture-btn { width: 100%; height: 70px; border-radius: 12px; background: #ef4444; border: 2px solid #ffffff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; font-weight: bold; transition: transform 0.1s; margin-bottom: 15px;}
+    .main-capture-btn:active { transform: scale(0.98); background: #dc2626; }
 
     /* GALERIE PHOTOS */
     .gallery-title { font-weight: 700; margin-top: 10px; margin-bottom: 10px; font-size: 15px; }
@@ -132,11 +131,6 @@
     <div class="title" data-i18n="photos">Photos</div>
     <div class="description"><span data-i18n="currentProject">Current project:</span> <strong id="currentProjectName"></strong></div>
     
-    <!-- BOUTON CAPTURE EN HAUT -->
-    <div class="capture-btn-container">
-      <button class="capture-btn" onclick="takePhoto()">📸</button>
-    </div>
-
     <div class="camera-container" id="cameraContainer">
       <div class="camera-status">
         <div class="camera-project" id="cameraProject">Project</div>
@@ -149,18 +143,20 @@
       <div id="flashEffect" class="flash-effect"></div>
     </div>
 
-    <!-- BOUTONS CAMERA ET FLIP EN BAS -->
+    <!-- BOUTON ROUGE DE CAPTURE A LA PLACE DE L'ANCIEN BOUTON -->
+    <button class="main-capture-btn" onclick="takePhoto()">📸 PRENDRE LA PHOTO</button>
+
     <div class="camera-controls">
-      <button id="cameraButton" class="button primary" onclick="startCamera()" data-i18n="activateCamera">ACTIVATE CAMERA</button>
-      <button class="button flip-btn" onclick="flipCamera()" data-i18n="flipCamera">🔄 FLIP</button>
+      <button id="cameraButton" class="button secondary" onclick="startCamera()" data-i18n="activateCamera">ACTIVER CAMERA (Si pas auto)</button>
+      <button class="button flip-btn" onclick="flipCamera()" data-i18n="flipCamera">🔄 BASCULER</button>
     </div>
 
     <!-- GALERIE PHOTOS -->
     <div class="gallery-title">Photos (<span id="galleryCount">0</span>)</div>
     <div id="photoGallery" class="photo-gallery"></div>
 
-    <button class="button secondary" onclick="finishProject()" data-i18n="finishProject">✓ FINISH PROJECT</button>
-    <button class="button secondary" onclick="showScreen('homeScreen')" data-i18n="changeProject">Change project</button>
+    <button class="button secondary" onclick="finishProject()" data-i18n="finishProject">✓ TERMINER LE PROJET</button>
+    <button class="button secondary" onclick="showScreen('homeScreen')" data-i18n="changeProject">Changer de projet</button>
     <div id="cameraMessage" class="message"></div>
     <div id="cameraDiag" class="diag">
       <strong data-i18n="diagTitle">Diagnosis:</strong>
@@ -223,7 +219,7 @@ const translations = {
     photos: "Photos",
     currentProject: "Current project:",
     activateCameraHint: "Tap « Activate camera »",
-    activateCamera: "ACTIVATE CAMERA",
+    activateCamera: "ACTIVATE CAMERA (If not auto)",
     flipCamera: "🔄 FLIP",
     finishProject: "✓ FINISH PROJECT",
     changeProject: "Change project",
@@ -276,7 +272,7 @@ const translations = {
     photos: "Photos",
     currentProject: "Projet actuel :",
     activateCameraHint: "Appuie sur « Activer la caméra »",
-    activateCamera: "ACTIVER LA CAMÉRA",
+    activateCamera: "ACTIVER CAMERA (Si pas auto)",
     flipCamera: "🔄 BASCULER",
     finishProject: "✓ TERMINER LE PROJET",
     changeProject: "Changer de projet",
@@ -329,7 +325,7 @@ const translations = {
     photos: "Foto's",
     currentProject: "Huidig project:",
     activateCameraHint: "Druk op « Camera activeren »",
-    activateCamera: "CAMERA ACTIVEREN",
+    activateCamera: "CAMERA ACTIVEREN (Indien niet auto)",
     flipCamera: "🔄 WISSELEN",
     finishProject: "✓ PROJECT VOLTOOIEN",
     changeProject: "Project wijzigen",
@@ -403,7 +399,7 @@ const STORAGE_KEY = "photo_pro_projects";
 let projects = loadProjects();
 let currentProjectId = null;
 let cameraStream = null;
-let cameraFacing = "user";
+let cameraFacing = "environment"; // <--- CAMERA ARRIERE PAR DEFAUT
 
 function loadProjects() {
   try {
@@ -476,7 +472,7 @@ function formatTime(d) {
 }
 function getCurrentProject() { return projects.find(p => p.id === currentProjectId); }
 
-function openCameraScreen() {
+async function openCameraScreen() {
   const project = getCurrentProject();
   if (!project) return;
   document.getElementById("currentProjectName").textContent = project.name;
@@ -484,6 +480,11 @@ function openCameraScreen() {
   document.getElementById("cameraIndicator").textContent = "● CAMERA";
   renderGallery(project);
   showScreen("cameraScreen");
+  
+  // Activation automatique de la caméra à l'ouverture
+  if (!cameraStream) {
+    await startCamera();
+  }
 }
 
 function renderGallery(project) {
@@ -594,7 +595,7 @@ function takePhoto() {
   if (!project) { showMessage("cameraMessage", t("msgNoProject"), "error"); return; }
   const video = document.getElementById("video");
 
-  // Effet visuel de Flash (puisque le son est coupé par le tel)
+  // Effet visuel de Flash
   const flash = document.getElementById("flashEffect");
   flash.style.opacity = "0.8";
   setTimeout(() => flash.style.opacity = "0", 150);
@@ -856,7 +857,7 @@ async function prepareTransfer() {
 
     const file = new File([blob], filename, { type: blob.type });
 
-    // Utilisation de l'API de partage native (WhatsApp, Mail, Drive...)
+    // Vérification de la compatibilité du partage de fichiers
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
@@ -865,7 +866,7 @@ async function prepareTransfer() {
       });
       showMessage("sendMessage", "Partage ouvert avec succès.", "success");
     } else {
-      // Fallback téléchargement
+      // Fallback téléchargement si le partage n'est pas supporté
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -877,8 +878,8 @@ async function prepareTransfer() {
       showMessage("sendMessage", t("msgPreparedZip", { names }) + " (Vérifiez vos téléchargements)", "success");
     }
   } catch (error) {
-    console.error(error);
-    showMessage("sendMessage", "Erreur lors du transfert.", "error");
+    console.error("Erreur détaillée :", error);
+    showMessage("sendMessage", "Erreur lors du transfert : " + error.message, "error");
   } finally {
     btn.textContent = originalText;
     btn.disabled = false;
