@@ -32,15 +32,30 @@
     .project-name { font-weight: 700; }
     .project-info { margin-top: 4px; color: #64748b; font-size: 12px; word-break: break-all; }
     .photo-count { white-space: nowrap; font-weight: 700; color: #2563eb; }
+    
+    /* CAMERA */
     .camera-container { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #111827; margin-bottom: 15px; }
     #video { width: 100%; height: 100%; object-fit: cover; display: none; }
     .camera-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #94a3b8; text-align: center; padding: 30px; }
     .camera-status { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; color: white; font-size: 12px; z-index: 2; }
     .camera-project { background: rgba(0,0,0,0.55); padding: 7px 10px; border-radius: 20px; }
     .camera-indicator { background: #16a34a; padding: 7px 10px; border-radius: 20px; }
+    
     .camera-controls { display: flex; gap: 10px; flex-wrap: wrap; }
     .camera-controls .button { margin-top: 0; flex: 1; min-width: 120px; }
     .flip-btn { background: #f59e0b; color: #fff; }
+    
+    /* BOUTON CAPTURE ROND */
+    .capture-btn-container { display: flex; justify-content: center; margin: 15px 0; }
+    .capture-btn { width: 75px; height: 75px; border-radius: 50%; background: #ef4444; border: 4px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; transition: transform 0.1s; }
+    .capture-btn:active { transform: scale(0.95); background: #dc2626; }
+
+    /* GALERIE PHOTOS */
+    .gallery-title { font-weight: 700; margin-top: 20px; margin-bottom: 10px; font-size: 15px; }
+    .photo-gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; min-height: 85px; }
+    .photo-gallery img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #cbd5e1; cursor: pointer; }
+
+    /* SEND SCREEN */
     .select-all { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; }
     .select-all input, .project-check { width: 20px; height: 20px; }
     .send-project { display: flex; align-items: center; gap: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 12px; }
@@ -51,6 +66,8 @@
     .transfer-options label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; cursor: pointer; }
     .transfer-options input[type="radio"] { width: 18px; height: 18px; }
     .transfer-options .date-info { font-size: 13px; color: #64748b; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+    
+    /* NAV & UTILS */
     .bottom-nav { display: flex; position: sticky; bottom: 0; background: white; border-top: 1px solid #e2e8f0; }
     .nav-button { flex: 1; border: 0; background: white; padding: 14px 8px; cursor: pointer; color: #64748b; font-size: 12px; }
     .nav-button.active { color: #2563eb; font-weight: 700; }
@@ -63,6 +80,7 @@
     .diag { background: #fff7ed; border: 1px solid #fdba74; color: #7c2d12; padding: 12px; border-radius: 10px; font-size: 13px; margin-top: 12px; display: none; }
     .diag.show { display: block; }
     .diag ul { margin: 8px 0 0 16px; padding: 0; }
+    
     @media (min-width: 600px) { body { padding: 30px 0; } .app { min-height: 800px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); } }
   </style>
 </head>
@@ -102,6 +120,7 @@
   <section id="cameraScreen" class="screen">
     <div class="title" data-i18n="photos">Photos</div>
     <div class="description"><span data-i18n="currentProject">Current project:</span> <strong id="currentProjectName"></strong></div>
+    
     <div class="camera-container">
       <div class="camera-status">
         <div class="camera-project" id="cameraProject">Project</div>
@@ -112,13 +131,21 @@
         <div><div style="font-size:45px;">📷</div><div data-i18n="activateCameraHint">Tap « Activate camera »</div></div>
       </div>
     </div>
+
     <div class="camera-controls">
       <button id="cameraButton" class="button primary" onclick="startCamera()" data-i18n="activateCamera">ACTIVATE CAMERA</button>
-      <button class="button secondary" onclick="takePhoto()" data-i18n="takePhoto">📸 PHOTO</button>
-    </div>
-    <div class="camera-controls" style="margin-top:10px;">
       <button class="button flip-btn" onclick="flipCamera()" data-i18n="flipCamera">🔄 FLIP</button>
     </div>
+
+    <!-- GROS BOUTON DE CAPTURE -->
+    <div class="capture-btn-container">
+      <button class="capture-btn" onclick="takePhoto()">📸</button>
+    </div>
+
+    <!-- GALERIE PHOTOS -->
+    <div class="gallery-title">Photos (<span id="galleryCount">0</span>)</div>
+    <div id="photoGallery" class="photo-gallery"></div>
+
     <button class="button secondary" onclick="finishProject()" data-i18n="finishProject">✓ FINISH PROJECT</button>
     <button class="button secondary" onclick="showScreen('homeScreen')" data-i18n="changeProject">Change project</button>
     <div id="cameraMessage" class="message"></div>
@@ -329,7 +356,7 @@ const translations = {
   }
 };
 
-let currentLang = localStorage.getItem("photo_pro_lang") || "en"; // défaut : anglais
+let currentLang = localStorage.getItem("photo_pro_lang") || "en";
 
 function t(key, vars = {}) {
   let str = translations[currentLang]?.[key] || translations.en[key] || key;
@@ -378,7 +405,7 @@ function saveProjects() {
   }
 }
 
-/* ============== NAV ============== */
+/* ============== NAVIGATION ============== */
 function showScreen(screenId) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   const screen = document.getElementById(screenId);
@@ -397,7 +424,7 @@ function showNewProject() {
   setTimeout(() => input.focus(), 100);
 }
 
-/* ============== PROJECTS ============== */
+/* ============== PROJETS ============== */
 function createProject() {
   const input = document.getElementById("projectInput");
   let projectName = input.value.trim();
@@ -439,10 +466,29 @@ function openCameraScreen() {
   document.getElementById("currentProjectName").textContent = project.name;
   document.getElementById("cameraProject").textContent = project.name;
   document.getElementById("cameraIndicator").textContent = "● CAMERA";
+  renderGallery(project);
   showScreen("cameraScreen");
 }
 
-/* ============== CAMERA + DIAGNOSTIC ============== */
+function renderGallery(project) {
+  const gallery = document.getElementById("photoGallery");
+  const countSpan = document.getElementById("galleryCount");
+  if (!gallery || !countSpan) return;
+
+  gallery.innerHTML = "";
+  countSpan.textContent = project.photos;
+
+  project.photoData.forEach((dataUrl) => {
+    if (dataUrl) {
+      const img = document.createElement("img");
+      img.src = dataUrl;
+      img.onclick = () => window.open(dataUrl, "_blank");
+      gallery.appendChild(img);
+    }
+  });
+}
+
+/* ============== CAMERA & DIAGNOSTIC ============== */
 function diagReset() {
   const el = document.getElementById("cameraDiag");
   const ul = document.getElementById("diagList");
@@ -464,14 +510,12 @@ async function startCamera() {
   const video = document.getElementById("video");
   const placeholder = document.getElementById("cameraPlaceholder");
 
-  // Check 1: Secure context
   if (!window.isSecureContext) {
     diagAdd("diagHttps");
     showMessage("cameraMessage", t("msgCameraError"), "error");
     return;
   }
 
-  // Check 2: mediaDevices API
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     diagAdd("diagApiMissing");
     showMessage("cameraMessage", t("msgCameraError"), "error");
@@ -495,19 +539,14 @@ async function startCamera() {
     showMessage("cameraMessage", t("msgCameraError"), "error");
     switch (error.name) {
       case "NotAllowedError":
-      case "PermissionDeniedError":
-        diagAdd("diagNotAllowed"); break;
+      case "PermissionDeniedError": diagAdd("diagNotAllowed"); break;
       case "NotFoundError":
-      case "DevicesNotFoundError":
-        diagAdd("diagNotFound"); break;
+      case "DevicesNotFoundError": diagAdd("diagNotFound"); break;
       case "NotReadableError":
-      case "TrackStartError":
-        diagAdd("diagNotReadable"); break;
+      case "TrackStartError": diagAdd("diagNotReadable"); break;
       case "OverconstrainedError":
-      case "ConstraintNotSatisfiedError":
-        diagAdd("diagOverconstrained"); break;
-      default:
-        diagAdd("diagUnknown");
+      case "ConstraintNotSatisfiedError": diagAdd("diagOverconstrained"); break;
+      default: diagAdd("diagUnknown");
     }
   }
 }
@@ -534,6 +573,7 @@ function takePhoto() {
     project.photos += 1;
     project.photoData.push(null);
     saveProjects();
+    renderGallery(project);
     showMessage("cameraMessage", t("msgPhotoDemo", { n: project.photos, name: project.name }), "success");
     return;
   }
@@ -550,6 +590,7 @@ function takePhoto() {
   project.photoData.push(dataUrl);
   try {
     saveProjects();
+    renderGallery(project);
     showMessage("cameraMessage", t("msgPhotoSaved", { n: project.photos }), "success");
   } catch (e) {
     showMessage("cameraMessage", "Storage full. Reduce photo count.", "error");
@@ -558,7 +599,7 @@ function takePhoto() {
 
 function finishProject() { stopCamera(); showScreen("homeScreen"); renderProjects(); }
 
-/* ============== RENDER ============== */
+/* ============== RENDER LISTS ============== */
 function renderProjects() {
   const container = document.getElementById("projectList");
   container.innerHTML = "";
@@ -626,7 +667,7 @@ function getZipMode() {
   return radio ? radio.value : "zip";
 }
 
-/* ============== ZIP (pure JS, store only) ============== */
+/* ============== ZIP CREATION ============== */
 async function createZipBlob(files) {
   const chunks = [];
   const encoder = new TextEncoder();
@@ -717,7 +758,7 @@ function dataURLToUint8Array(dataURL) {
   return arr;
 }
 
-/* ============== TRANSFER (organized folders) ============== */
+/* ============== TRANSFER & SHARE ============== */
 async function prepareTransfer() {
   const selected = getSelectedProjects();
   if (selected.length === 0) {
@@ -728,6 +769,8 @@ async function prepareTransfer() {
   const now = new Date();
   const stamp = `${formatDate(now)}_${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}`;
   const names = selected.map(p => p.folderName).join(", ");
+
+  let blob, filename;
 
   if (mode === "zip") {
     const root = `TRANSFERT_${stamp}`;
@@ -758,14 +801,8 @@ async function prepareTransfer() {
         });
       });
     }
-    try {
-      const blob = await createZipBlob(files);
-      downloadBlob(blob, `PHOTO_PRO_${stamp}.zip`);
-      showMessage("sendMessage", t("msgPreparedZip", { names }), "success");
-    } catch (e) {
-      console.error(e);
-      showMessage("sendMessage", "ZIP creation error.", "error");
-    }
+    blob = await createZipBlob(files);
+    filename = `PHOTO_PRO_${stamp}.zip`;
   } else {
     const metadata = {
       transferDate: formatDate(now),
@@ -773,13 +810,27 @@ async function prepareTransfer() {
       generated: now.toISOString(),
       projects: selected.map(p => ({ name: p.name, folder: p.folderName, photos: p.photos, date: p.date, time: p.time }))
     };
-    const blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
-    downloadBlob(blob, `PHOTO_PRO_${stamp}_info.json`);
-    showMessage("sendMessage", t("msgPrepared", { names }), "success");
+    blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
+    filename = `PHOTO_PRO_${stamp}_info.json`;
   }
-}
 
-function downloadBlob(blob, filename) {
+  // 1. Essayer le partage natif (idéal sur Android/S23)
+  const file = new File([blob], filename, { type: blob.type });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Transfert PHOTO PRO',
+        text: `Transfert du ${stamp}`
+      });
+      showMessage("sendMessage", "Partage ouvert avec succès.", "success");
+      return;
+    } catch (err) {
+      console.log("Partage annulé ou échoué, on tente le téléchargement classique.", err);
+    }
+  }
+
+  // 2. Téléchargement classique (fallback)
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -788,6 +839,8 @@ function downloadBlob(blob, filename) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
+  
+  showMessage("sendMessage", t("msgPreparedZip", { names }) + " (Vérifiez vos téléchargements)", "success");
 }
 
 async function shareProjects() {
@@ -801,6 +854,7 @@ async function shareProjects() {
   const timeStr = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
   const text = selected.map(p => `${p.folderName} — ${p.photos} photos`).join("\n")
     + `\n\n${t("transferDate", { date: `${dateStr} ${timeStr}` })}`;
+  
   if (navigator.share) {
     try {
       await navigator.share({ title: "PHOTO PRO", text: "PHOTO PRO\n\n" + text });
@@ -842,20 +896,12 @@ function init() {
     }
   }, 1000);
 
-  // Register Service Worker
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("sw.js")
         .then(reg => console.log("SW registered:", reg.scope))
         .catch(err => console.warn("SW registration failed:", err));
     });
-  }
-
-  // Pre-check permission status (informational only)
-  if (navigator.permissions?.query) {
-    navigator.permissions.query({ name: "camera" })
-      .then(status => console.log("Camera permission:", status.state))
-      .catch(() => {});
   }
 }
 
