@@ -489,9 +489,23 @@ async function preparePhotos() {
 }
 
 function sharePhotos() {
-  // Ouvre WhatsApp
-  window.open("https://api.whatsapp.com/send", "_blank");
+  // Utiliser le lien officiel wa.me, beaucoup plus fiable sur Android
+  window.open("https://wa.me/", "_blank");
 }
+
+// Intercepter le bouton physique retour d'Android
+history.pushState(null, document.title, location.href);
+window.addEventListener('popstate', function () {
+  if (currentScreenId !== "homeScreen") {
+    if (currentScreenId === "cameraScreen") stopCamera();
+    showScreen("homeScreen");
+    history.pushState(null, document.title, location.href);
+  } else {
+    history.back();
+  }
+});
+
+applyTranslations();
 </script>
 </body>
 </html>
