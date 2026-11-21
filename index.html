@@ -23,9 +23,10 @@
     .input:focus { border-color: #2563eb; }
     .button { width: 100%; border: 0; border-radius: 12px; padding: 15px; margin-top: 12px; cursor: pointer; font-weight: 700; font-size: 15px; }
     .primary { background: #2563eb; color: white; }
-    .primary:hover { background: #1d4ed8; }
+    .primary:disabled { background: #93c5fd; cursor: wait; }
     .secondary { background: #e5e7eb; color: #111827; }
     .danger { background: #fee2e2; color: #991b1b; }
+    
     .projects { margin-top: 25px; }
     .project { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px; margin-bottom: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; }
     .project:hover { background: #f1f5f9; }
@@ -34,25 +35,25 @@
     .photo-count { white-space: nowrap; font-weight: 700; color: #2563eb; }
     
     /* CAMERA */
-    .camera-container { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #111827; margin-bottom: 15px; }
+    .camera-container { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #111827; margin-bottom: 10px; transition: opacity 0.1s; }
     #video { width: 100%; height: 100%; object-fit: cover; display: none; }
     .camera-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #94a3b8; text-align: center; padding: 30px; }
     .camera-status { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; color: white; font-size: 12px; z-index: 2; }
     .camera-project { background: rgba(0,0,0,0.55); padding: 7px 10px; border-radius: 20px; }
     .camera-indicator { background: #16a34a; padding: 7px 10px; border-radius: 20px; }
     
-    .camera-controls { display: flex; gap: 10px; flex-wrap: wrap; }
-    .camera-controls .button { margin-top: 0; flex: 1; min-width: 120px; }
-    .flip-btn { background: #f59e0b; color: #fff; }
-    
-    /* BOUTON CAPTURE ROND */
-    .capture-btn-container { display: flex; justify-content: center; margin: 15px 0; }
-    .capture-btn { width: 75px; height: 75px; border-radius: 50%; background: #ef4444; border: 4px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; transition: transform 0.1s; }
+    /* BOUTON CAPTURE EN HAUT */
+    .capture-btn-container { display: flex; justify-content: center; margin-bottom: 15px; }
+    .capture-btn { width: 70px; height: 70px; border-radius: 50%; background: #ef4444; border: 4px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; transition: transform 0.1s; }
     .capture-btn:active { transform: scale(0.95); background: #dc2626; }
 
+    .camera-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .camera-controls .button { margin-top: 0; flex: 1; min-width: 120px; }
+    .flip-btn { background: #f59e0b; color: #fff; }
+
     /* GALERIE PHOTOS */
-    .gallery-title { font-weight: 700; margin-top: 20px; margin-bottom: 10px; font-size: 15px; }
-    .photo-gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; min-height: 85px; }
+    .gallery-title { font-weight: 700; margin-top: 10px; margin-bottom: 10px; font-size: 15px; }
+    .photo-gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; min-height: 85px; }
     .photo-gallery img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #cbd5e1; cursor: pointer; }
 
     /* SEND SCREEN */
@@ -77,9 +78,19 @@
     .message.show { display: block; }
     .message.error { background: #fef2f2; color: #991b1b; }
     .message.success { background: #f0fdf4; color: #166534; }
+    
     .diag { background: #fff7ed; border: 1px solid #fdba74; color: #7c2d12; padding: 12px; border-radius: 10px; font-size: 13px; margin-top: 12px; display: none; }
     .diag.show { display: block; }
     .diag ul { margin: 8px 0 0 16px; padding: 0; }
+
+    /* MODAL PHOTO PLEIN ECRAN */
+    .photo-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+    .photo-modal.show { display: flex; }
+    .photo-modal img { max-width: 100%; max-height: 80vh; object-fit: contain; }
+    .photo-modal .close-btn { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; background: none; border: none; cursor: pointer; padding: 10px; }
+
+    /* FLASH EFFECT */
+    .flash-effect { position: absolute; inset: 0; background: white; opacity: 0; z-index: 10; pointer-events: none; transition: opacity 0.1s; }
     
     @media (min-width: 600px) { body { padding: 30px 0; } .app { min-height: 800px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); } }
   </style>
@@ -121,7 +132,12 @@
     <div class="title" data-i18n="photos">Photos</div>
     <div class="description"><span data-i18n="currentProject">Current project:</span> <strong id="currentProjectName"></strong></div>
     
-    <div class="camera-container">
+    <!-- BOUTON CAPTURE EN HAUT -->
+    <div class="capture-btn-container">
+      <button class="capture-btn" onclick="takePhoto()">📸</button>
+    </div>
+
+    <div class="camera-container" id="cameraContainer">
       <div class="camera-status">
         <div class="camera-project" id="cameraProject">Project</div>
         <div class="camera-indicator" id="cameraIndicator">● CAMERA</div>
@@ -130,16 +146,13 @@
       <div id="cameraPlaceholder" class="camera-placeholder">
         <div><div style="font-size:45px;">📷</div><div data-i18n="activateCameraHint">Tap « Activate camera »</div></div>
       </div>
+      <div id="flashEffect" class="flash-effect"></div>
     </div>
 
+    <!-- BOUTONS CAMERA ET FLIP EN BAS -->
     <div class="camera-controls">
       <button id="cameraButton" class="button primary" onclick="startCamera()" data-i18n="activateCamera">ACTIVATE CAMERA</button>
       <button class="button flip-btn" onclick="flipCamera()" data-i18n="flipCamera">🔄 FLIP</button>
-    </div>
-
-    <!-- GROS BOUTON DE CAPTURE -->
-    <div class="capture-btn-container">
-      <button class="capture-btn" onclick="takePhoto()">📸</button>
     </div>
 
     <!-- GALERIE PHOTOS -->
@@ -170,7 +183,7 @@
       <label><input type="radio" name="zipMode" value="nozip" /> <span data-i18n="asFiles">📁 Send without ZIP (separate files)</span></label>
       <div class="date-info" id="transferDateInfo"></div>
     </div>
-    <button class="button primary" onclick="prepareTransfer()" data-i18n="prepareTransfer">📦 PREPARE TRANSFER</button>
+    <button id="transferBtn" class="button primary" onclick="prepareTransfer()" data-i18n="prepareTransfer">📦 PREPARE TRANSFER</button>
     <button class="button secondary" onclick="shareProjects()" data-i18n="share">📤 SHARE</button>
     <div id="sendMessage" class="message"></div>
   </section>
@@ -189,6 +202,12 @@
   </nav>
 </div>
 
+<!-- MODAL POUR VOIR LES PHOTOS EN GRAND -->
+<div id="photoModal" class="photo-modal">
+  <button class="close-btn" onclick="closePhotoModal()">×</button>
+  <img id="modalImage" src="" alt="Photo" />
+</div>
+
 <script>
 /* ============== TRANSLATIONS ============== */
 const translations = {
@@ -205,7 +224,6 @@ const translations = {
     currentProject: "Current project:",
     activateCameraHint: "Tap « Activate camera »",
     activateCamera: "ACTIVATE CAMERA",
-    takePhoto: "📸 PHOTO",
     flipCamera: "🔄 FLIP",
     finishProject: "✓ FINISH PROJECT",
     changeProject: "Change project",
@@ -236,8 +254,8 @@ const translations = {
     msgShareOpened: "Share menu opened.",
     msgNoProjects: "No projects yet.",
     msgNoProjectsAvailable: "No projects available.",
+    msgLoading: "Creating file... Please wait.",
     transferDate: "Transfer date and time: {date}",
-    photosCount: "{n} photo(s)",
     diagHttps: "Page is not served over HTTPS. The camera API only works on HTTPS or localhost.",
     diagApiMissing: "navigator.mediaDevices is not available. Use HTTPS or a recent browser.",
     diagNotAllowed: "Camera permission denied. Allow it in the browser settings for this site.",
@@ -259,7 +277,6 @@ const translations = {
     currentProject: "Projet actuel :",
     activateCameraHint: "Appuie sur « Activer la caméra »",
     activateCamera: "ACTIVER LA CAMÉRA",
-    takePhoto: "📸 PHOTO",
     flipCamera: "🔄 BASCULER",
     finishProject: "✓ TERMINER LE PROJET",
     changeProject: "Changer de projet",
@@ -290,8 +307,8 @@ const translations = {
     msgShareOpened: "Menu de partage ouvert.",
     msgNoProjects: "Aucun projet pour le moment.",
     msgNoProjectsAvailable: "Aucun projet disponible.",
+    msgLoading: "Création du fichier... Veuillez patienter.",
     transferDate: "Date et heure du transfert : {date}",
-    photosCount: "{n} photo(s)",
     diagHttps: "La page n'est pas servie en HTTPS. L'API caméra ne fonctionne qu'en HTTPS ou localhost.",
     diagApiMissing: "navigator.mediaDevices indisponible. Utilise HTTPS ou un navigateur récent.",
     diagNotAllowed: "Permission caméra refusée. Autorise-la dans les paramètres du navigateur pour ce site.",
@@ -313,7 +330,6 @@ const translations = {
     currentProject: "Huidig project:",
     activateCameraHint: "Druk op « Camera activeren »",
     activateCamera: "CAMERA ACTIVEREN",
-    takePhoto: "📸 FOTO",
     flipCamera: "🔄 WISSELEN",
     finishProject: "✓ PROJECT VOLTOOIEN",
     changeProject: "Project wijzigen",
@@ -344,8 +360,8 @@ const translations = {
     msgShareOpened: "Deelmenu geopend.",
     msgNoProjects: "Nog geen projecten.",
     msgNoProjectsAvailable: "Geen projecten beschikbaar.",
+    msgLoading: "Bestand aanmaken... Even geduld.",
     transferDate: "Datum en tijd van overdracht: {date}",
-    photosCount: "{n} foto('s)",
     diagHttps: "Pagina wordt niet via HTTPS geleverd. De camera-API werkt alleen via HTTPS of localhost.",
     diagApiMissing: "navigator.mediaDevices is niet beschikbaar. Gebruik HTTPS of een recente browser.",
     diagNotAllowed: "Cameratoestemming geweigerd. Sta het toe in de browserinstellingen voor deze site.",
@@ -482,10 +498,19 @@ function renderGallery(project) {
     if (dataUrl) {
       const img = document.createElement("img");
       img.src = dataUrl;
-      img.onclick = () => window.open(dataUrl, "_blank");
+      img.onclick = () => openPhotoModal(dataUrl);
       gallery.appendChild(img);
     }
   });
+}
+
+/* ============== MODAL PHOTO ============== */
+function openPhotoModal(dataUrl) {
+  document.getElementById("modalImage").src = dataUrl;
+  document.getElementById("photoModal").classList.add("show");
+}
+function closePhotoModal() {
+  document.getElementById("photoModal").classList.remove("show");
 }
 
 /* ============== CAMERA & DIAGNOSTIC ============== */
@@ -568,6 +593,11 @@ function takePhoto() {
   const project = getCurrentProject();
   if (!project) { showMessage("cameraMessage", t("msgNoProject"), "error"); return; }
   const video = document.getElementById("video");
+
+  // Effet visuel de Flash (puisque le son est coupé par le tel)
+  const flash = document.getElementById("flashEffect");
+  flash.style.opacity = "0.8";
+  setTimeout(() => flash.style.opacity = "0", 150);
 
   if (!cameraStream) {
     project.photos += 1;
@@ -765,82 +795,94 @@ async function prepareTransfer() {
     showMessage("sendMessage", t("msgSelectOne"), "error");
     return;
   }
-  const mode = getZipMode();
-  const now = new Date();
-  const stamp = `${formatDate(now)}_${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}`;
-  const names = selected.map(p => p.folderName).join(", ");
+  
+  const btn = document.getElementById("transferBtn");
+  const originalText = btn.textContent;
+  btn.textContent = t("msgLoading");
+  btn.disabled = true;
 
-  let blob, filename;
+  // Laisser le temps à l'interface de se mettre à jour avant de bloquer le thread
+  await new Promise(resolve => setTimeout(resolve, 50));
 
-  if (mode === "zip") {
-    const root = `TRANSFERT_${stamp}`;
-    const files = [];
-    const metadata = {
-      generated: now.toISOString(),
-      transferDate: formatDate(now),
-      transferTime: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`,
-      projects: selected.map(p => ({ name: p.name, folder: p.folderName, photos: p.photos }))
-    };
-    files.push({
-      name: `${root}/_INFO/transfer_info.json`,
-      data: new TextEncoder().encode(JSON.stringify(metadata, null, 2))
-    });
-    for (const project of selected) {
-      const projectFolder = `${root}/${project.folderName}`;
+  try {
+    const mode = getZipMode();
+    const now = new Date();
+    const stamp = `${formatDate(now)}_${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}`;
+    const names = selected.map(p => p.folderName).join(", ");
+
+    let blob, filename;
+
+    if (mode === "zip") {
+      const root = `TRANSFERT_${stamp}`;
+      const files = [];
+      const metadata = {
+        generated: now.toISOString(),
+        transferDate: formatDate(now),
+        transferTime: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`,
+        projects: selected.map(p => ({ name: p.name, folder: p.folderName, photos: p.photos }))
+      };
       files.push({
-        name: `${projectFolder}/projet_info.txt`,
-        data: new TextEncoder().encode(
-          `Project: ${project.name}\nFolder: ${project.folderName}\nPhotos: ${project.photos}\nDate: ${project.date}\nTime: ${project.time}\n`
-        )
+        name: `${root}/_INFO/transfer_info.json`,
+        data: new TextEncoder().encode(JSON.stringify(metadata, null, 2))
       });
-      project.photoData.forEach((dataUrl, idx) => {
-        if (!dataUrl) return;
+      for (const project of selected) {
+        const projectFolder = `${root}/${project.folderName}`;
         files.push({
-          name: `${projectFolder}/photo_${String(idx+1).padStart(3,"0")}.jpg`,
-          data: dataURLToUint8Array(dataUrl)
+          name: `${projectFolder}/projet_info.txt`,
+          data: new TextEncoder().encode(
+            `Project: ${project.name}\nFolder: ${project.folderName}\nPhotos: ${project.photos}\nDate: ${project.date}\nTime: ${project.time}\n`
+          )
         });
-      });
+        project.photoData.forEach((dataUrl, idx) => {
+          if (!dataUrl) return;
+          files.push({
+            name: `${projectFolder}/photo_${String(idx+1).padStart(3,"0")}.jpg`,
+            data: dataURLToUint8Array(dataUrl)
+          });
+        });
+      }
+      blob = await createZipBlob(files);
+      filename = `PHOTO_PRO_${stamp}.zip`;
+    } else {
+      const metadata = {
+        transferDate: formatDate(now),
+        transferTime: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`,
+        generated: now.toISOString(),
+        projects: selected.map(p => ({ name: p.name, folder: p.folderName, photos: p.photos, date: p.date, time: p.time }))
+      };
+      blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
+      filename = `PHOTO_PRO_${stamp}_info.json`;
     }
-    blob = await createZipBlob(files);
-    filename = `PHOTO_PRO_${stamp}.zip`;
-  } else {
-    const metadata = {
-      transferDate: formatDate(now),
-      transferTime: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`,
-      generated: now.toISOString(),
-      projects: selected.map(p => ({ name: p.name, folder: p.folderName, photos: p.photos, date: p.date, time: p.time }))
-    };
-    blob = new Blob([JSON.stringify(metadata, null, 2)], { type: "application/json" });
-    filename = `PHOTO_PRO_${stamp}_info.json`;
-  }
 
-  // 1. Essayer le partage natif (idéal sur Android/S23)
-  const file = new File([blob], filename, { type: blob.type });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
+    const file = new File([blob], filename, { type: blob.type });
+
+    // Utilisation de l'API de partage native (WhatsApp, Mail, Drive...)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
         title: 'Transfert PHOTO PRO',
         text: `Transfert du ${stamp}`
       });
       showMessage("sendMessage", "Partage ouvert avec succès.", "success");
-      return;
-    } catch (err) {
-      console.log("Partage annulé ou échoué, on tente le téléchargement classique.", err);
+    } else {
+      // Fallback téléchargement
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      showMessage("sendMessage", t("msgPreparedZip", { names }) + " (Vérifiez vos téléchargements)", "success");
     }
+  } catch (error) {
+    console.error(error);
+    showMessage("sendMessage", "Erreur lors du transfert.", "error");
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
   }
-
-  // 2. Téléchargement classique (fallback)
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-  
-  showMessage("sendMessage", t("msgPreparedZip", { names }) + " (Vérifiez vos téléchargements)", "success");
 }
 
 async function shareProjects() {
