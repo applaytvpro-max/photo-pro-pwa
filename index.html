@@ -40,10 +40,10 @@
     /* GALERIE PHOTOS AVEC SELECTION */
     .gallery-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 10px;}
     .photo-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-bottom: 20px; }
-    .photo-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer;}
+    .photo-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 3px solid transparent; cursor: pointer;}
     .photo-item img { width: 100%; height: 100%; object-fit: cover; }
     .photo-item.selected { border-color: #2563eb; }
-    .photo-checkbox { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; color: transparent; }
+    .photo-checkbox { position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.7); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; color: transparent; pointer-events: none; }
     .photo-item.selected .photo-checkbox { background: #2563eb; color: white; }
 
     .send-project { display: flex; align-items: center; gap: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 12px; }
@@ -105,7 +105,10 @@
 
     <div class="gallery-header">
       <div style="font-weight:700;">Galerie du projet</div>
-      <div id="selectedCount" style="color:#2563eb; font-weight:bold;">0 sélectionnée(s)</div>
+      <div>
+        <button onclick="toggleSelectAll()" style="background:none; border:none; color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline;">Tout sélectionner</button>
+        <span id="selectedCount" style="color:#2563eb; font-weight:bold; margin-left:10px;">0 sélection</span>
+      </div>
     </div>
     
     <!-- LA GALERIE EST ICI -->
@@ -161,7 +164,6 @@ function renderProjects() {
 function createProject() {
   const name = document.getElementById("projectInput").value.trim();
   if (!name) return;
-  const now = new Date();
   const project = {
     id: Date.now(), name: name, photos: 0, photoData: []
   };
@@ -221,22 +223,23 @@ function renderGallery(p) {
     const div = document.createElement("div");
     div.className = "photo-item" + (selectedPhotos.has(index) ? " selected" : "");
     
-    // Clic pour sélectionner / désélectionner
-    div.onclick = (e) => {
-      // Si on clique sur l'image en elle-même, on l'ouvre en grand, sinon on coche
-      if (e.target.tagName === 'IMG') {
-        document.getElementById("modalImage").src = url;
-        document.getElementById("photoModal").classList.add("show");
-      } else {
-        if (selectedPhotos.has(index)) selectedPhotos.delete(index);
-        else selectedPhotos.add(index);
-        renderGallery(p);
-      }
+    // On gère le clic pour sélectionner
+    div.onclick = () => {
+      if (selectedPhotos.has(index)) selectedPhotos.delete(index);
+      else selectedPhotos.add(index);
+      renderGallery(p);
+    };
+
+    // Un appui long (ou un double clic) pour voir la photo en grand
+    div.ondblclick = (e) => {
+      e.preventDefault();
+      document.getElementById("modalImage").src = url;
+      document.getElementById("photoModal").classList.add("show");
     };
 
     div.innerHTML = `
       <img src="${url}">
-      <div class="photo-checkbox" onclick="toggleSelect(${index})">✓</div>
+      <div class="photo-checkbox">✓</div>
     `;
     gallery.appendChild(div);
   });
@@ -244,10 +247,15 @@ function renderGallery(p) {
   document.getElementById("selectedCount").textContent = `${selectedPhotos.size} sélectionnée(s)`;
 }
 
-function toggleSelect(index) {
-  if (selectedPhotos.has(index)) selectedPhotos.delete(index);
-  else selectedPhotos.add(index);
-  renderGallery(projects.find(x => x.id === currentProjectId));
+// Fonction pour tout sélectionner / désélectionner
+function toggleSelectAll() {
+  const p = projects.find(x => x.id === currentProjectId);
+  if (selectedPhotos.size === p.photoData.length) {
+    selectedPhotos.clear(); // Tout désélectionner
+  } else {
+    p.photoData.forEach((_, i) => selectedPhotos.add(i)); // Tout sélectionner
+  }
+  renderGallery(p);
 }
 
 function finishProject() {
@@ -273,7 +281,6 @@ async function shareSelectedPhotosToWhatsApp() {
     const files = [];
     const selectedIndices = Array.from(selectedPhotos).sort((a,b) => a-b);
 
-    // On prépare les fichiers
     for (const idx of selectedIndices) {
       const dataUrl = p.photoData[idx];
       if (!dataUrl) continue;
@@ -286,22 +293,17 @@ async function shareSelectedPhotosToWhatsApp() {
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
-    // Le texte à copier
     const infoText = `Projet: ${p.name}\nDate: ${dateStr} à ${timeStr}`;
     await navigator.clipboard.writeText(infoText);
 
-    // Si on a 5 fichiers ou moins, on utilise le partage natif Android
     if (files.length <= 5 && navigator.canShare && navigator.canShare({ files: files })) {
       await navigator.share({
         files: files,
         title: 'Partage Photos'
       });
-      // Après le partage natif, on remet le bouton à zéro
       btn.textContent = "📤 PARTAGER LA SÉLECTION SUR WHATSAPP";
       btn.disabled = false;
     } else {
-      // Si plus de 5 fichiers, Android bloque le partage direct.
-      // On télécharge les photos dans la galerie et on ouvre WhatsApp.
       for (const file of files) {
         const url = URL.createObjectURL(file);
         const a = document.createElement("a");
