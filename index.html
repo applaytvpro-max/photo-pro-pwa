@@ -22,7 +22,6 @@
     .button { width: 100%; border: 0; border-radius: 12px; padding: 15px; margin-top: 10px; cursor: pointer; font-weight: 700; font-size: 15px; }
     .primary { background: #2563eb; color: white; }
     .secondary { background: #e5e7eb; color: #111827; }
-    .success { background: #16a34a; color: white; }
     .whatsapp-btn { background: #25D366; color: white; display: flex; justify-content: center; align-items: center; gap: 10px;}
     
     .projects { margin-top: 10px; }
@@ -111,10 +110,9 @@
       </div>
     </div>
     
-    <!-- LA GALERIE EST ICI -->
     <div id="photoGallery" class="photo-gallery"></div>
     
-    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp()">📤 PARTAGER LA SÉLECTION SUR WHATSAPP</button>
+    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp()">📤 ENVOYER DIRECTEMENT SUR WHATSAPP</button>
     <button class="button secondary" onclick="finishProject()">TERMINER LE PROJET</button>
   </section>
 
@@ -139,7 +137,7 @@ let projects = JSON.parse(localStorage.getItem("photo_pro_projects") || "[]");
 let currentProjectId = null;
 let cameraStream = null;
 let cameraFacing = "environment";
-let selectedPhotos = new Set(); // Stocke les index des photos cochées
+let selectedPhotos = new Set();
 
 function saveProjects() { localStorage.setItem("photo_pro_projects", JSON.stringify(projects)); }
 function showScreen(id) {
@@ -164,9 +162,7 @@ function renderProjects() {
 function createProject() {
   const name = document.getElementById("projectInput").value.trim();
   if (!name) return;
-  const project = {
-    id: Date.now(), name: name, photos: 0, photoData: []
-  };
+  const project = { id: Date.now(), name: name, photos: 0, photoData: [] };
   projects.unshift(project);
   saveProjects();
   currentProjectId = project.id;
@@ -223,38 +219,29 @@ function renderGallery(p) {
     const div = document.createElement("div");
     div.className = "photo-item" + (selectedPhotos.has(index) ? " selected" : "");
     
-    // On gère le clic pour sélectionner
     div.onclick = () => {
       if (selectedPhotos.has(index)) selectedPhotos.delete(index);
       else selectedPhotos.add(index);
       renderGallery(p);
     };
 
-    // Un appui long (ou un double clic) pour voir la photo en grand
     div.ondblclick = (e) => {
       e.preventDefault();
       document.getElementById("modalImage").src = url;
       document.getElementById("photoModal").classList.add("show");
     };
 
-    div.innerHTML = `
-      <img src="${url}">
-      <div class="photo-checkbox">✓</div>
-    `;
+    div.innerHTML = `<img src="${url}"><div class="photo-checkbox">✓</div>`;
     gallery.appendChild(div);
   });
 
   document.getElementById("selectedCount").textContent = `${selectedPhotos.size} sélectionnée(s)`;
 }
 
-// Fonction pour tout sélectionner / désélectionner
 function toggleSelectAll() {
   const p = projects.find(x => x.id === currentProjectId);
-  if (selectedPhotos.size === p.photoData.length) {
-    selectedPhotos.clear(); // Tout désélectionner
-  } else {
-    p.photoData.forEach((_, i) => selectedPhotos.add(i)); // Tout sélectionner
-  }
+  if (selectedPhotos.size === p.photoData.length) selectedPhotos.clear();
+  else p.photoData.forEach((_, i) => selectedPhotos.add(i));
   renderGallery(p);
 }
 
@@ -264,12 +251,13 @@ function finishProject() {
   showScreen("homeScreen");
 }
 
-/* ============== PARTAGE VERS WHATSAPP ============== */
+/* ============== PARTAGE DIRECT VERS WHATSAPP ============== */
 async function shareSelectedPhotosToWhatsApp() {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
 
   const btn = event.target;
+  const originalText = btn.textContent;
   btn.textContent = "Préparation...";
   btn.disabled = true;
 
@@ -281,6 +269,7 @@ async function shareSelectedPhotosToWhatsApp() {
     const files = [];
     const selectedIndices = Array.from(selectedPhotos).sort((a,b) => a-b);
 
+    // Préparer les fichiers avec le bon nom (Projet_Date_Heure.jpg)
     for (const idx of selectedIndices) {
       const dataUrl = p.photoData[idx];
       if (!dataUrl) continue;
@@ -293,38 +282,27 @@ async function shareSelectedPhotosToWhatsApp() {
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
-    const infoText = `Projet: ${p.name}\nDate: ${dateStr} à ${timeStr}`;
-    await navigator.clipboard.writeText(infoText);
+    const shareData = {
+      files: files,
+      title: `Photos ${p.name}`,
+      text: `Projet: ${p.name}\nDate: ${dateStr} à ${timeStr}`
+    };
 
-    if (files.length <= 5 && navigator.canShare && navigator.canShare({ files: files })) {
-      await navigator.share({
-        files: files,
-        title: 'Partage Photos'
-      });
-      btn.textContent = "📤 PARTAGER LA SÉLECTION SUR WHATSAPP";
-      btn.disabled = false;
+    // Vérification si le téléphone peut partager plusieurs fichiers (max 5 généralement)
+    if (navigator.canShare && navigator.canShare(shareData)) {
+      // OUVERTURE DU MENU DE PARTAGE ANDROID
+      await navigator.share(shareData);
     } else {
-      for (const file of files) {
-        const url = URL.createObjectURL(file);
-        const a = document.createElement("a");
-        a.href = url; a.download = file.name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }
-      
-      alert(`${files.length} photos ont été enregistrées dans votre galerie avec le nom du projet et la date.\n\nLe texte a été copié. WhatsApp va s'ouvrir : allez dans la galerie, sélectionnez les photos et collez le texte.`);
-      
-      window.open("https://wa.me/", "_blank");
-      
-      btn.textContent = "📤 PARTAGER LA SÉLECTION SUR WHATSAPP";
-      btn.disabled = false;
+      alert("Votre téléphone limite le partage direct à 5 photos maximum. Veuillez sélectionner moins de photos ou les envoyer en plusieurs fois.");
     }
 
   } catch (e) {
-    console.error(e);
-    btn.textContent = "📤 PARTAGER LA SÉLECTION SUR WHATSAPP";
+    if (e.name !== 'AbortError') {
+      console.error(e);
+      alert("Erreur lors du partage : " + e.message);
+    }
+  } finally {
+    btn.textContent = originalText;
     btn.disabled = false;
   }
 }
