@@ -22,7 +22,6 @@
     .screen.active { display: block; }
     
     .title { font-size: 22px; font-weight: 700; margin-bottom: 15px; }
-    .description { color: #64748b; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
     
     .input { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; outline: none; font-size: 16px; margin-bottom: 15px; }
     .input:focus { border-color: #2563eb; }
@@ -31,7 +30,6 @@
     .primary { background: #2563eb; color: white; }
     .primary:disabled { background: #93c5fd; cursor: wait; }
     .secondary { background: #e5e7eb; color: #111827; }
-    .danger { background: #ef4444; color: white; }
     .success { background: #16a34a; color: white; }
     
     /* LISTE DES PROJETS */
@@ -85,7 +83,7 @@
 <div class="app">
   <header class="top-bar">
     <button class="back-btn" id="globalBackBtn" onclick="handleBack()">◀</button>
-    <div class="logo">PHOTO PRO</div>
+    <div class="logo" data-i18n="appTitle">PHOTO PRO</div>
     <select id="langSelector" class="lang-selector" onchange="changeLanguage(this.value)">
       <option value="en">EN</option>
       <option value="fr">FR</option>
@@ -95,27 +93,26 @@
 
   <!-- HOME -->
   <section id="homeScreen" class="screen active">
-    <div class="title">Mes Projets</div>
+    <div class="title" data-i18n="myProjects">My Projects</div>
     
-    <!-- ZONE DE RECHERCHE -->
-    <input type="text" id="searchInput" class="input" placeholder="🔍 Rechercher par nom ou date..." oninput="renderProjects()" />
+    <input type="text" id="searchInput" class="input" placeholder="🔍 Search by name or date..." oninput="renderProjects()" />
     
-    <button class="button primary" style="margin-top:0; margin-bottom:20px;" onclick="showNewProject()">+ NOUVEAU PROJET</button>
+    <button class="button primary" style="margin-top:0; margin-bottom:20px;" onclick="showNewProject()" data-i18n="btnNewProject">+ NEW PROJECT</button>
     
     <div class="projects"><div id="projectList"></div></div>
   </section>
 
   <!-- NEW PROJECT -->
   <section id="newProjectScreen" class="screen">
-    <div class="title">Nouveau Projet</div>
+    <div class="title" data-i18n="newProject">New Project</div>
     <input id="projectInput" class="input" type="text" placeholder="Ex: AB45821" autocomplete="off" />
-    <button class="button primary" onclick="createProject()">📷 CRÉER ET OUVRIR</button>
+    <button class="button primary" onclick="createProject()" data-i18n="btnCreateOpen">📷 CREATE AND OPEN</button>
     <div id="projectMessage" class="message"></div>
   </section>
 
   <!-- CAMERA -->
   <section id="cameraScreen" class="screen">
-    <div class="title" id="currentProjectName">Projet</div>
+    <div class="title" id="currentProjectName">Project</div>
     
     <div class="camera-container" id="cameraContainer">
       <video id="video" autoplay playsinline muted></video>
@@ -125,50 +122,138 @@
       <div id="flashEffect" class="flash-effect"></div>
     </div>
 
-    <!-- BOUTON DE CAPTURE PRINCIPAL -->
-    <button class="main-capture-btn" onclick="takePhoto()">📸 PRENDRE LA PHOTO</button>
+    <button class="main-capture-btn" onclick="takePhoto()" data-i18n="btnTakePhoto">📸 TAKE PHOTO</button>
 
     <div class="camera-controls">
-      <button id="cameraButton" class="button secondary" onclick="startCamera()">ACTIVER CAMÉRA</button>
-      <button class="button flip-btn secondary" onclick="flipCamera()">🔄 BASCULER</button>
+      <button id="cameraButton" class="button secondary" onclick="startCamera()" data-i18n="btnActivateCam">ACTIVATE CAMERA</button>
+      <button class="button secondary" onclick="flipCamera()" data-i18n="btnFlip">🔄 FLIP</button>
     </div>
 
-    <!-- GALERIE PHOTOS -->
-    <div class="gallery-title">Photos du projet (<span id="galleryCount">0</span>)</div>
+    <div class="gallery-title" data-i18n="photosOfProject">Project photos</div> <span id="galleryCount" style="font-weight:bold; color:#2563eb;">0</span>
     <div id="photoGallery" class="photo-gallery"></div>
 
-    <button class="button success" style="margin-top:20px;" onclick="finishProject()">✓ TERMINER LE PROJET</button>
+    <button class="button success" style="margin-top:20px;" onclick="finishProject()" data-i18n="btnFinishProject">✓ FINISH PROJECT</button>
     <div id="cameraMessage" class="message"></div>
   </section>
 
   <!-- SEND -->
   <section id="sendScreen" class="screen">
-    <div class="title">Transfert</div>
+    <div class="title" data-i18n="transferTitle">Transfer</div>
     
-    <div style="font-weight:700; margin-bottom:10px;">Sélectionnez les projets :</div>
+    <div style="font-weight:700; margin-bottom:10px;" data-i18n="selectProjects">Select projects:</div>
     <div id="sendProjectList"></div>
     
     <div class="transfer-options">
-      <label><input type="radio" name="zipMode" value="zip" checked /> <span>Grouper dans un fichier ZIP</span></label>
+      <label><input type="radio" name="zipMode" value="zip" checked /> <span data-i18n="groupZip">Group in a ZIP file</span></label>
       <div class="date-info" id="transferDateInfo"></div>
     </div>
     
-    <!-- NOUVEAU SYSTEME DE TRANSFERT EN 2 ETAPES POUR EVITER L'ERREUR -->
-    <button id="btnCreateZip" class="button primary" onclick="createTransferFile()">1. Créer le fichier ZIP</button>
-    <button id="btnShareZip" class="button success" onclick="shareTransferFile()" style="display:none;">2. Partager (WhatsApp, etc.)</button>
+    <button id="btnCreateZip" class="button primary" onclick="createTransferFile()" data-i18n="btnCreateZip">1. Create ZIP file</button>
+    <button id="btnShareZip" class="button success" onclick="shareTransferFile()" style="display:none;" data-i18n="btnShareZip">2. Share (WhatsApp, etc.)</button>
     
     <div id="sendMessage" class="message"></div>
   </section>
 
+  <nav style="display:flex; background:white; border-top:1px solid #e2e8f0;">
+    <button class="button secondary" style="border-radius:0; margin:0; padding:15px 5px;" onclick="showScreen('homeScreen')" data-i18n="navHome">🏠 Home</button>
+    <button class="button secondary" style="border-radius:0; margin:0; padding:15px 5px;" onclick="showScreen('sendScreen')" data-i18n="navTransfer">📤 Transfer</button>
+  </nav>
 </div>
 
 <!-- MODAL POUR VOIR LES PHOTOS EN GRAND -->
 <div id="photoModal" class="photo-modal">
-  <button class="close-btn" onclick="closePhotoModal()">✕ Fermer</button>
+  <button class="close-btn" onclick="closePhotoModal()" data-i18n="btnClose">✕ Close</button>
   <img id="modalImage" src="" alt="Photo" />
 </div>
 
 <script>
+/* ============== TRADUCTIONS ============== */
+const translations = {
+  en: {
+    appTitle: "PHOTO PRO",
+    myProjects: "My Projects",
+    btnNewProject: "+ NEW PROJECT",
+    newProject: "New Project",
+    btnCreateOpen: "📷 CREATE AND OPEN",
+    btnTakePhoto: "📸 TAKE PHOTO",
+    btnActivateCam: "ACTIVATE CAMERA",
+    btnFlip: "🔄 FLIP",
+    photosOfProject: "Project photos:",
+    btnFinishProject: "✓ FINISH PROJECT",
+    transferTitle: "Transfer",
+    selectProjects: "Select projects:",
+    groupZip: "Group in a ZIP file",
+    btnCreateZip: "1. Create ZIP file",
+    btnShareZip: "2. Share (WhatsApp, etc.)",
+    navHome: "🏠 Home",
+    navTransfer: "📤 Transfer",
+    btnClose: "✕ Close",
+    searchPlaceholder: "🔍 Search by name or date..."
+  },
+  fr: {
+    appTitle: "PHOTO PRO",
+    myProjects: "Mes Projets",
+    btnNewProject: "+ NOUVEAU PROJET",
+    newProject: "Nouveau Projet",
+    btnCreateOpen: "📷 CRÉER ET OUVRIR",
+    btnTakePhoto: "📸 PRENDRE LA PHOTO",
+    btnActivateCam: "ACTIVER CAMÉRA",
+    btnFlip: "🔄 BASCULER",
+    photosOfProject: "Photos du projet :",
+    btnFinishProject: "✓ TERMINER LE PROJET",
+    transferTitle: "Transfert",
+    selectProjects: "Sélectionnez les projets :",
+    groupZip: "Grouper dans un fichier ZIP",
+    btnCreateZip: "1. Créer le fichier ZIP",
+    btnShareZip: "2. Partager (WhatsApp, etc.)",
+    navHome: "🏠 Accueil",
+    navTransfer: "📤 Transfert",
+    btnClose: "✕ Fermer",
+    searchPlaceholder: "🔍 Rechercher par nom ou date..."
+  },
+  nl: {
+    appTitle: "PHOTO PRO",
+    myProjects: "Mijn Projecten",
+    btnNewProject: "+ NIEUW PROJECT",
+    newProject: "Nieuw Project",
+    btnCreateOpen: "📷 AANMAKEN EN OPENEN",
+    btnTakePhoto: "📸 FOTO NEMEN",
+    btnActivateCam: "CAMERA ACTIVEREN",
+    btnFlip: "🔄 WISSELEN",
+    photosOfProject: "Projectfoto's:",
+    btnFinishProject: "✓ PROJECT VOLTOOIEN",
+    transferTitle: "Overdracht",
+    selectProjects: "Selecteer projecten:",
+    groupZip: "Groeperen in een ZIP-bestand",
+    btnCreateZip: "1. ZIP-bestand aanmaken",
+    btnShareZip: "2. Delen (WhatsApp, enz.)",
+    navHome: "🏠 Home",
+    navTransfer: "📤 Overdracht",
+    btnClose: "✕ Sluiten",
+    searchPlaceholder: "🔍 Zoeken op naam of datum..."
+  }
+};
+
+let currentLang = localStorage.getItem("photo_pro_lang") || "en";
+
+function applyTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (translations[currentLang][key]) {
+      el.textContent = translations[currentLang][key];
+    }
+  });
+  document.getElementById("searchInput").placeholder = translations[currentLang].searchPlaceholder;
+  document.documentElement.lang = currentLang;
+  document.getElementById("langSelector").value = currentLang;
+}
+
+function changeLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem("photo_pro_lang", lang);
+  applyTranslations();
+}
+
 /* ============== VARIABLES D'ÉTAT ============== */
 let projects = JSON.parse(localStorage.getItem("photo_pro_projects") || "[]");
 let currentProjectId = null;
@@ -184,23 +269,15 @@ function showScreen(screenId) {
   document.getElementById(screenId).classList.add("active");
   currentScreenId = screenId;
   
-  // Gestion du bouton retour global
   const backBtn = document.getElementById("globalBackBtn");
-  if (screenId === "homeScreen") {
-    backBtn.style.display = "none";
-  } else {
-    backBtn.style.display = "block";
-  }
+  backBtn.style.display = (screenId === "homeScreen") ? "none" : "block";
 
-  // Actions spécifiques à l'écran
   if (screenId === "homeScreen") renderProjects();
   if (screenId === "sendScreen") { renderSendProjects(); updateDateInfo(); }
 }
 
 function handleBack() {
-  if (currentScreenId === "cameraScreen") {
-    stopCamera();
-  }
+  if (currentScreenId === "cameraScreen") stopCamera();
   showScreen("homeScreen");
 }
 
@@ -211,11 +288,9 @@ window.addEventListener('popstate', function (event) {
     handleBack();
     history.pushState(null, document.title, location.href);
   } else {
-    // Si on est déjà à l'accueil, on laisse le navigateur quitter
     history.back();
   }
 });
-
 
 /* ============== GESTION DES PROJETS & RECHERCHE ============== */
 function renderProjects() {
@@ -223,7 +298,6 @@ function renderProjects() {
   const searchTerm = document.getElementById("searchInput").value.toLowerCase();
   container.innerHTML = "";
 
-  // Filtrer par nom ou par date (dossier)
   const filtered = projects.filter(p => 
     p.name.toLowerCase().includes(searchTerm) || 
     p.folderName.toLowerCase().includes(searchTerm)
@@ -247,6 +321,12 @@ function renderProjects() {
     `;
     container.appendChild(el);
   });
+}
+
+function showNewProject() {
+  showScreen("newProjectScreen");
+  document.getElementById("projectInput").value = "";
+  setTimeout(() => document.getElementById("projectInput").focus(), 100);
 }
 
 function createProject() {
@@ -283,7 +363,7 @@ function saveData() {
 async function openCameraScreen() {
   const project = projects.find(p => p.id === currentProjectId);
   if (!project) return;
-  document.getElementById("currentProjectName").textContent = `Projet: ${project.name}`;
+  document.getElementById("currentProjectName").textContent = project.name;
   renderGallery(project);
   showScreen("cameraScreen");
   if (!cameraStream) startCamera();
@@ -301,7 +381,7 @@ async function startCamera() {
     video.srcObject = cameraStream;
     video.style.display = "block";
     placeholder.style.display = "none";
-    document.getElementById("cameraButton").textContent = "CAMÉRA ACTIVE";
+    document.getElementById("cameraButton").textContent = "✅ CAMÉRA ACTIVE";
   } catch (error) {
     alert("Erreur Caméra: " + error.name + ". Vérifiez les permissions.");
   }
@@ -313,7 +393,7 @@ function stopCamera() {
     cameraStream = null;
     document.getElementById("video").style.display = "none";
     document.getElementById("cameraPlaceholder").style.display = "flex";
-    document.getElementById("cameraButton").textContent = "ACTIVER CAMÉRA";
+    document.getElementById("cameraButton").textContent = translations[currentLang].btnActivateCam;
   }
 }
 
@@ -327,7 +407,6 @@ function takePhoto() {
   const video = document.getElementById("video");
   if (!project || !cameraStream) return;
 
-  // Flash visuel
   const flash = document.getElementById("flashEffect");
   flash.style.opacity = "0.8";
   setTimeout(() => flash.style.opacity = "0", 150);
@@ -339,7 +418,7 @@ function takePhoto() {
   if (cameraFacing === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
   ctx.drawImage(video, 0, 0);
 
-  project.photoData.push(canvas.toDataURL("image/jpeg", 0.7)); // Qualité réduite pour économiser la mémoire
+  project.photoData.push(canvas.toDataURL("image/jpeg", 0.7));
   project.photos = project.photoData.length;
   saveData();
   renderGallery(project);
@@ -381,7 +460,7 @@ function renderSendProjects() {
 }
 
 function updateDateInfo() {
-  document.getElementById("transferDateInfo").textContent = "Date du transfert : " + new Date().toLocaleString();
+  document.getElementById("transferDateInfo").textContent = "Date: " + new Date().toLocaleString();
 }
 
 async function createTransferFile() {
@@ -392,7 +471,6 @@ async function createTransferFile() {
   btn.textContent = "Création en cours...";
   btn.disabled = true;
 
-  // Laisser le temps au navigateur d'afficher le texte
   await new Promise(r => setTimeout(r, 100));
 
   try {
@@ -400,7 +478,6 @@ async function createTransferFile() {
     const now = new Date();
     const stamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
     
-    // Création du fichier ZIP (méthode simplifiée pour éviter les blocages mémoire)
     const files = [];
     for (const p of selectedProjects) {
       p.photoData.forEach((dataUrl, i) => {
@@ -417,7 +494,6 @@ async function createTransferFile() {
       });
     }
     
-    // Ajouter un fichier texte d'info
     const infoText = `TRANSFERT PHOTO PRO\nDate: ${now.toLocaleString()}\nProjets: ${selectedProjects.map(p=>p.name).join(", ")}`;
     files.push({
       name: `INFO_TRANSFERT.txt`,
@@ -427,16 +503,15 @@ async function createTransferFile() {
     lastGeneratedBlob = await createZipBlob(files);
     lastGeneratedFilename = `PHOTO_PRO_${stamp}.zip`;
 
-    // Préparer le bouton de partage
     document.getElementById("btnShareZip").style.display = "block";
-    document.getElementById("btnShareZip").textContent = "2. Envoyer vers WhatsApp / Autre";
+    document.getElementById("btnShareZip").textContent = translations[currentLang].btnShareZip;
     
     btn.textContent = "✅ Fichier prêt !";
     btn.classList.replace("primary", "secondary");
 
   } catch (e) {
     alert("Erreur de création : " + e.message);
-    btn.textContent = "1. Créer le fichier ZIP";
+    btn.textContent = translations[currentLang].btnCreateZip;
     btn.disabled = false;
   }
 }
@@ -455,7 +530,6 @@ async function shareTransferFile() {
       });
     } catch (e) { console.log("Partage annulé"); }
   } else {
-    // Fallback téléchargement si le téléphone ne supporte pas le partage de fichier
     const url = URL.createObjectURL(lastGeneratedBlob);
     const a = document.createElement("a");
     a.href = url; a.download = lastGeneratedFilename;
@@ -464,7 +538,6 @@ async function shareTransferFile() {
   }
 }
 
-// Générateur ZIP basique
 async function createZipBlob(files) {
   const chunks = [];
   const encoder = new TextEncoder();
@@ -512,6 +585,7 @@ async function createZipBlob(files) {
 function escapeHTML(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 // Initialisation
+applyTranslations();
 renderProjects();
 </script>
 </body>
