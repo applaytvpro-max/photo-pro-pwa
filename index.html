@@ -112,7 +112,7 @@
     
     <div id="photoGallery" class="photo-gallery"></div>
     
-    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp(event)" data-i18n="sendWhatsapp">📤 PRÉPARER POUR WHATSAPP</button>
+    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp(event)" data-i18n="sendWhatsapp">📤 ENVOYER SUR WHATSAPP</button>
     <button class="button secondary" onclick="finishProject()" data-i18n="finishProject">TERMINER LE PROJET</button>
   </section>
 
@@ -139,7 +139,7 @@ const translations = {
     projectNamePlaceholder: "Project name or number", createOpen: "CREATE AND OPEN", back: "Back",
     activateFolder: "📂 ACTIVATE PHYSICAL FOLDER", folderConnected: "✅ Physical folder connected",
     takePhoto: "📸 TAKE PHOTO", openCamera: "OPEN CAMERA", flipCamera: "🔄 FLIP",
-    gallery: "Project Gallery", selectAll: "Select all", sendWhatsapp: "📤 PREPARE FOR WHATSAPP",
+    gallery: "Project Gallery", selectAll: "Select all", sendWhatsapp: "📤 SEND TO WHATSAPP",
     finishProject: "FINISH PROJECT", navHome: "Home", navProject: "Project", project: "Project", date: "Date", at: "at"
   },
   fr: {
@@ -147,7 +147,7 @@ const translations = {
     projectNamePlaceholder: "Nom ou numéro de projet", createOpen: "CRÉER ET OUVRIR", back: "Retour",
     activateFolder: "📂 ACTIVER LE DOSSIER PHYSIQUE", folderConnected: "✅ Dossier physique connecté",
     takePhoto: "📸 PRENDRE LA PHOTO", openCamera: "OUVRIR CAMÉRA", flipCamera: "🔄 BASCULER",
-    gallery: "Galerie du projet", selectAll: "Tout sélectionner", sendWhatsapp: "📤 PRÉPARER POUR WHATSAPP",
+    gallery: "Galerie du projet", selectAll: "Tout sélectionner", sendWhatsapp: "📤 ENVOYER SUR WHATSAPP",
     finishProject: "TERMINER LE PROJET", navHome: "Accueil", navProject: "Projet", project: "Projet", date: "Date", at: "à"
   },
   nl: {
@@ -155,7 +155,7 @@ const translations = {
     projectNamePlaceholder: "Projectnaam of nummer", createOpen: "AANMAKEN EN OPENEN", back: "Terug",
     activateFolder: "📂 FYSIEKE MAP ACTIVEREN", folderConnected: "✅ Fysieke map verbonden",
     takePhoto: "📸 FOTO NEMEN", openCamera: "CAMERA OPENEN", flipCamera: "🔄 WISSELEN",
-    gallery: "Projectgalerij", selectAll: "Alles selecteren", sendWhatsapp: "📤 VOORBEREIDEN VOOR WHATSAPP",
+    gallery: "Projectgalerij", selectAll: "Alles selecteren", sendWhatsapp: "📤 VERZENDEN NAAR WHATSAPP",
     finishProject: "PROJECT VOLTOOIEN", navHome: "Home", navProject: "Project", project: "Project", date: "Datum", at: "om"
   }
 };
@@ -323,7 +323,7 @@ function finishProject() {
   showScreen("homeScreen");
 }
 
-/* ============== NOUVELLE MÉTHODE DE TRANSFERT SANS BLOCAGE ============== */
+/* ============== RETOUR À LA MÉTHODE DE COPIE MANUELLE (SANS BUG) ============== */
 async function shareSelectedPhotosToWhatsApp(event) {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
@@ -338,40 +338,86 @@ async function shareSelectedPhotosToWhatsApp(event) {
     const dateStr = now.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang, { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
     const timeStr = now.toTimeString().slice(0,5).replace(":", "h");
     
-    // 1. Télécharger les photos dans la galerie du téléphone
-    let count = 0;
+    const files = [];
     const selectedIndices = Array.from(selectedPhotos).sort((a,b) => a-b);
-    
+
     for (const idx of selectedIndices) {
       const dataUrl = p.photoData[idx];
       if (!dataUrl) continue;
       
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `${p.name}_${dateStr}_${timeStr}_P${idx+1}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      count++;
+      const bin = atob(dataUrl.split(",")[1]);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      
+      const filename = `${p.name}_${dateStr}_${timeStr}_P${idx+1}.jpg`;
+      files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
-    // 2. Copier le texte dans le presse-papiers
+    // 1. Copier le texte automatiquement
     const shareText = `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
     try { await navigator.clipboard.writeText(shareText); } catch (e) {}
 
-    // 3. Ouvrir WhatsApp directement (sans passer par le menu de partage bloquant)
-    setTimeout(() => {
-      window.open("https://wa.me/", "_blank");
-      alert(`${count} photos ont été enregistrées dans votre galerie.\n\nLe texte (Projet + Date) a été copié.\n\nDans WhatsApp : appuyez sur le trombone (📎), choisissez Galerie, sélectionnez vos photos et collez le texte.`);
-    }, 500);
+    // 2. Envoi des photos uniquement (sans texte)
+    const shareData = { files: files };
+
+    if (navigator.canShare && navigator.canShare(shareData)) {
+      await navigator.share(shareData);
+      setTimeout(() => {
+        alert("Photos envoyées.\n\nLe texte (Projet + Date) a été copié automatiquement.\nDans WhatsApp, faites un appui long dans la barre de message et cliquez sur 'Coller'.");
+      }, 800);
+    } else {
+      alert("Votre téléphone ne supporte pas le partage direct. Un fichier ZIP va être utilisé.");
+      const zipBlob = await createZipBlob(files);
+      const zipFile = new File([zipBlob], `${p.name}_${dateStr}.zip`, { type: "application/zip" });
+      await navigator.share({ files: [zipFile] });
+    }
 
   } catch (e) {
-    console.error(e);
-    alert("Erreur : " + e.message);
+    if (e.name !== 'AbortError') {
+      console.error(e);
+      alert("Erreur lors du partage : " + e.message);
+    }
   } finally {
     btn.textContent = originalText;
     btn.disabled = false;
   }
+}
+
+/* ============== ZIP SECOURS ============== */
+async function createZipBlob(files) {
+  const chunks = []; const encoder = new TextEncoder(); const centralDir = []; let offset = 0;
+  function crc32(data) {
+    let crc = 0xFFFFFFFF;
+    const table = crc32.table || (crc32.table = (() => { const t = new Uint32Array(256); for (let i = 0; i < 256; i++) { let c = i; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[i] = c; } return t; })());
+    for (let i = 0; i < data.length; i++) crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  for (const file of files) {
+    const nameBytes = encoder.encode(file.name);
+    const data = new Uint8Array(await file.arrayBuffer());
+    const crc = crc32(data);
+    const now = new Date();
+    const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+    const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    const lh = new Uint8Array(30 + nameBytes.length);
+    const lv = new DataView(lh.buffer);
+    lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint16(6, 0, true); lv.setUint16(8, 0, true); lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true); lv.setUint32(14, crc, true); lv.setUint32(18, data.length, true); lv.setUint32(22, data.length, true); lv.setUint16(26, nameBytes.length, true); lh.set(nameBytes, 30);
+    chunks.push(lh, data);
+    centralDir.push({ nameBytes, crc, size: data.length, offset, dosTime, dosDate });
+    offset += lh.length + data.length;
+  }
+  const cdStart = offset;
+  for (const entry of centralDir) {
+    const ch = new Uint8Array(46 + entry.nameBytes.length);
+    const cv = new DataView(ch.buffer);
+    cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0, true); cv.setUint16(10, 0, true); cv.setUint16(12, entry.dosTime, true); cv.setUint16(14, entry.dosDate, true); cv.setUint32(16, entry.crc, true); cv.setUint32(20, entry.size, true); cv.setUint32(24, entry.size, true); cv.setUint16(28, entry.nameBytes.length, true); cv.setUint32(42, entry.offset, true); ch.set(entry.nameBytes, 46);
+    chunks.push(ch); offset += ch.length;
+  }
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, centralDir.length, true); ev.setUint16(10, centralDir.length, true); ev.setUint32(12, offset - cdStart, true); ev.setUint32(16, cdStart, true);
+  chunks.push(eocd);
+  return new Blob(chunks, { type: "application/zip" });
 }
 
 // Initialisation
