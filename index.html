@@ -324,7 +324,7 @@ function finishProject() {
   showScreen("homeScreen");
 }
 
-/* ============== PARTAGE AUTOMATIQUE DU TEXTE VIA FICHIER TXT ============== */
+/* ============== PARTAGE SUR WHATSAPP (CORRIGÉ SANS MESSAGE VIDE) ============== */
 async function shareSelectedPhotosToWhatsApp(event) {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
@@ -342,7 +342,6 @@ async function shareSelectedPhotosToWhatsApp(event) {
     const files = [];
     const selectedIndices = Array.from(selectedPhotos).sort((a,b) => a-b);
 
-    // 1. Ajouter les photos
     for (const idx of selectedIndices) {
       const dataUrl = p.photoData[idx];
       if (!dataUrl) continue;
@@ -355,16 +354,20 @@ async function shareSelectedPhotosToWhatsApp(event) {
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
-    // 2. Ajouter le fichier texte d'informations (la solution !)
+    // Copier le texte dans le presse-papiers pour éviter le bug "message vide"
     const shareText = `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
-    const textFile = new File([shareText], `${p.name}_INFO.txt`, { type: "text/plain" });
-    files.push(textFile);
+    try { await navigator.clipboard.writeText(shareText); } catch (e) {}
 
-    // 3. Envoi direct
+    // Envoi UNIQUEMENT des photos, sans champ texte
     const shareData = { files: files };
 
     if (navigator.canShare && navigator.canShare(shareData)) {
       await navigator.share(shareData);
+      
+      setTimeout(() => {
+        alert("Photos envoyées.\n\nLe texte (Projet + Date) a été copié automatiquement.\nDans WhatsApp, faites un appui long dans la barre de message et cliquez sur 'Coller'.");
+      }, 800);
+      
     } else {
       alert("Votre téléphone ne supporte pas le partage direct. Un fichier ZIP va être utilisé.");
       const zipBlob = await createZipBlob(files);
@@ -373,7 +376,10 @@ async function shareSelectedPhotosToWhatsApp(event) {
     }
 
   } catch (e) {
-    if (e.name !== 'AbortError') alert("Erreur : " + e.message);
+    if (e.name !== 'AbortError') {
+      console.error(e);
+      alert("Erreur lors du partage : " + e.message);
+    }
   } finally {
     btn.textContent = originalText;
     btn.disabled = false;
