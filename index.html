@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
-  <link rel="manifest" href="manifest.json" />
+  
+  <!-- Liens pour les icônes et le manifest (Ajout pour le logo) -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+  <link rel="shortcut icon" href="./favicon.ico">
+  
   <title>PHOTO PRO</title>
   <style>
     * { box-sizing: border-box; }
@@ -210,13 +217,31 @@ function renderProjects() {
   const container = document.getElementById("projectList");
   const term = document.getElementById("searchInput").value.toLowerCase();
   container.innerHTML = "";
+  
   projects.filter(p => p.name.toLowerCase().includes(term)).forEach(p => {
     const el = document.createElement("div");
     el.className = "project";
     el.onclick = () => { currentProjectId = p.id; openProject(); };
-    el.innerHTML = `<div><div class="project-name">${p.name}</div><div class="project-info">${p.photos} photos</div></div><div class="photo-count">➔</div>`;
+    
+    // Bouton de suppression
+    el.innerHTML = `
+      <div style="flex: 1;">
+        <div class="project-name">${p.name}</div>
+        <div class="project-info">${p.photos} photos</div>
+      </div>
+      <button onclick="deleteProject(event, ${p.id})" style="background: #fee2e2; color: #991b1b; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer;">🗑️</button>
+    `;
     container.appendChild(el);
   });
+}
+
+function deleteProject(event, id) {
+  event.stopPropagation();
+  if (confirm("Voulez-vous vraiment supprimer ce projet et toutes ses photos de l'application ?")) {
+    projects = projects.filter(p => p.id !== id);
+    saveProjects();
+    renderProjects();
+  }
 }
 
 function createProject() {
@@ -242,11 +267,10 @@ async function startCamera() {
   try {
     if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
     
-    // AMÉLIORATION : Demande la plus haute résolution possible au téléphone
     const constraints = {
       video: { 
         facingMode: { ideal: cameraFacing },
-        width: { ideal: 4096 },  // Force le 4K / max du capteur
+        width: { ideal: 4096 },
         height: { ideal: 2160 },
         aspectRatio: { ideal: 3/4 }
       }, 
@@ -278,7 +302,6 @@ async function takePhoto() {
   if (cameraFacing === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
   ctx.drawImage(video, 0, 0);
   
-  // AMÉLIORATION : Qualité JPEG maximale
   const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
   
   if (rootDirectoryHandle) {
