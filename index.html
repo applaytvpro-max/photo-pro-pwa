@@ -241,7 +241,19 @@ async function openProject() {
 async function startCamera() {
   try {
     if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: cameraFacing } }, audio: false });
+    
+    // AMÉLIORATION : Demande la plus haute résolution possible au téléphone
+    const constraints = {
+      video: { 
+        facingMode: { ideal: cameraFacing },
+        width: { ideal: 4096 },  // Force le 4K / max du capteur
+        height: { ideal: 2160 },
+        aspectRatio: { ideal: 3/4 }
+      }, 
+      audio: false 
+    };
+    
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
     document.getElementById("video").srcObject = cameraStream;
     document.getElementById("video").style.display = "block";
     document.getElementById("cameraPlaceholder").style.display = "none";
@@ -260,11 +272,13 @@ async function takePhoto() {
   setTimeout(() => flash.style.opacity = "0", 150);
 
   const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth; 
+  canvas.height = video.videoHeight;
   const ctx = canvas.getContext("2d");
   if (cameraFacing === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
   ctx.drawImage(video, 0, 0);
   
+  // AMÉLIORATION : Qualité JPEG maximale
   const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
   
   if (rootDirectoryHandle) {
@@ -323,7 +337,7 @@ function finishProject() {
   showScreen("homeScreen");
 }
 
-/* ============== RETOUR À LA MÉTHODE DE COPIE MANUELLE (SANS BUG) ============== */
+/* ============== TRANSFERT ============== */
 async function shareSelectedPhotosToWhatsApp(event) {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
@@ -353,11 +367,9 @@ async function shareSelectedPhotosToWhatsApp(event) {
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
-    // 1. Copier le texte automatiquement
     const shareText = `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
     try { await navigator.clipboard.writeText(shareText); } catch (e) {}
 
-    // 2. Envoi des photos uniquement (sans texte)
     const shareData = { files: files };
 
     if (navigator.canShare && navigator.canShare(shareData)) {
