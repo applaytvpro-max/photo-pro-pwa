@@ -24,14 +24,19 @@
     .screen.active { display: block; }
     .title { font-size: 22px; font-weight: 700; margin-bottom: 15px; }
     
-    .input { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; outline: none; font-size: 16px; margin-bottom: 15px;}
+    .input { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 12px; outline: none; font-size: 16px; margin-bottom: 10px;}
     .button { width: 100%; border: 0; border-radius: 12px; padding: 15px; margin-top: 10px; cursor: pointer; font-weight: 700; font-size: 15px; }
     .primary { background: #2563eb; color: white; }
     .secondary { background: #e5e7eb; color: #111827; }
     .success { background: #16a34a; color: white; }
     .whatsapp-btn { background: #25D366; color: white; display: flex; justify-content: center; align-items: center; gap: 10px;}
     
-    /* AMÉLIORATION DES CARTES PROJETS */
+    /* FILTRE CALENDRIER */
+    .filter-row { display: flex; gap: 10px; margin-bottom: 15px; }
+    .filter-row input[type="date"] { flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; color: #111827; background: #fff; }
+    .filter-row button { width: auto; padding: 0 15px; margin: 0; background: #e5e7eb; color: #111827; border-radius: 12px; font-size: 14px;}
+
+    /* CARTES PROJETS */
     .projects { margin-top: 10px; }
     .project { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s; }
     .project:active { transform: scale(0.98); background: #f8fafc; }
@@ -79,7 +84,15 @@
 
   <section id="homeScreen" class="screen active">
     <div class="title" data-i18n="myProjects">Mes projets</div>
+    
+    <!-- BARRE DE RECHERCHE ET CALENDRIER -->
     <input type="text" id="searchInput" class="input" data-i18n="searchPlaceholder" placeholder="🔍 Rechercher un projet..." oninput="renderProjects()" />
+    
+    <div class="filter-row">
+      <input type="date" id="dateFilter" onchange="renderProjects()" />
+      <button onclick="clearDateFilter()" data-i18n="clear">Effacer</button>
+    </div>
+
     <button class="button primary" onclick="showScreen('newProjectScreen')" data-i18n="newProject">+ NOUVEAU PROJET</button>
     <div class="projects"><div id="projectList"></div></div>
   </section>
@@ -87,7 +100,7 @@
   <section id="newProjectScreen" class="screen">
     <div class="title" data-i18n="newProject">Nouveau projet</div>
     <input id="projectInput" class="input" type="text" data-i18n="projectNamePlaceholder" placeholder="Nom ou numéro de projet" />
-    <button class="button primary" onclick="createProject()" data-i18n="createOpen">CRÉER ET OUVRIR</button>
+    <button id="btnCreateProject" class="button primary" onclick="createProject()" data-i18n="createOpen">CRÉER ET OUVRIR</button>
     <button class="button secondary" onclick="showScreen('homeScreen')" data-i18n="back">Retour</button>
   </section>
 
@@ -148,7 +161,7 @@ const translations = {
     activateFolder: "📂 ACTIVATE PHYSICAL FOLDER", folderConnected: "✅ Physical folder connected",
     takePhoto: "📸 TAKE PHOTO", openCamera: "OPEN CAMERA", flipCamera: "🔄 FLIP",
     gallery: "Project Gallery", selectAll: "Select all", sendWhatsapp: "📤 SEND TO WHATSAPP",
-    finishProject: "FINISH PROJECT", navHome: "Home", navProject: "Project", project: "Project", date: "Date", at: "at"
+    finishProject: "FINISH PROJECT", navHome: "Home", navProject: "Project", project: "Project", date: "Date", at: "at", clear: "Clear"
   },
   fr: {
     myProjects: "Mes projets", searchPlaceholder: "🔍 Rechercher un projet...", newProject: "+ NOUVEAU PROJET",
@@ -156,7 +169,7 @@ const translations = {
     activateFolder: "📂 ACTIVER LE DOSSIER PHYSIQUE", folderConnected: "✅ Dossier physique connecté",
     takePhoto: "📸 PRENDRE LA PHOTO", openCamera: "OUVRIR CAMÉRA", flipCamera: "🔄 BASCULER",
     gallery: "Galerie du projet", selectAll: "Tout sélectionner", sendWhatsapp: "📤 ENVOYER SUR WHATSAPP",
-    finishProject: "TERMINER LE PROJET", navHome: "Accueil", navProject: "Projet", project: "Projet", date: "Date", at: "à"
+    finishProject: "TERMINER LE PROJET", navHome: "Accueil", navProject: "Projet", project: "Projet", date: "Date", at: "à", clear: "Effacer"
   },
   nl: {
     myProjects: "Mijn projecten", searchPlaceholder: "🔍 Zoek een project...", newProject: "+ NIEUW PROJECT",
@@ -164,7 +177,7 @@ const translations = {
     activateFolder: "📂 FYSIEKE MAP ACTIVEREN", folderConnected: "✅ Fysieke map verbonden",
     takePhoto: "📸 FOTO NEMEN", openCamera: "CAMERA OPENEN", flipCamera: "🔄 WISSELEN",
     gallery: "Projectgalerij", selectAll: "Alles selecteren", sendWhatsapp: "📤 VERZENDEN NAAR WHATSAPP",
-    finishProject: "PROJECT VOLTOOIEN", navHome: "Home", navProject: "Project", project: "Project", date: "Datum", at: "om"
+    finishProject: "PROJECT VOLTOOIEN", navHome: "Home", navProject: "Project", project: "Project", date: "Datum", at: "om", clear: "Wissen"
   }
 };
 
@@ -213,24 +226,42 @@ async function initPhysicalStorage() {
   }
 }
 
-/* ============== PROJETS (TRIÉS PAR DATE) ============== */
+/* ============== PROJETS (TRIÉS ET FILTRÉS PAR DATE) ============== */
 function renderProjects() {
   const container = document.getElementById("projectList");
   const term = document.getElementById("searchInput").value.toLowerCase();
+  const dateFilter = document.getElementById("dateFilter").value;
+  
   container.innerHTML = "";
   
   // 1. Trier les projets du plus récent au plus ancien
   const sortedProjects = [...projects].sort((a, b) => b.id - a.id);
   
-  // 2. Filtrer selon la recherche
-  const filtered = sortedProjects.filter(p => p.name.toLowerCase().includes(term));
+  // 2. Filtrer selon la recherche ET la date
+  const filtered = sortedProjects.filter(p => {
+    const matchName = p.name.toLowerCase().includes(term);
+    
+    // Si aucune date n'est sélectionnée, on garde tout
+    if (!dateFilter) return matchName;
+    
+    // Comparer la date (format YYYY-MM-DD)
+    const d = new Date(p.id);
+    const projectDateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const matchDate = projectDateStr === dateFilter;
+    
+    return matchName && matchDate;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b;">Aucun projet trouvé.</div>`;
+    return;
+  }
 
   filtered.forEach(p => {
     const el = document.createElement("div");
     el.className = "project";
     el.onclick = () => { currentProjectId = p.id; openProject(); };
     
-    // Formater la date pour l'affichage
     const d = new Date(p.id);
     const dateAffichage = d.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
 
@@ -246,9 +277,14 @@ function renderProjects() {
   });
 }
 
+function clearDateFilter() {
+  document.getElementById("dateFilter").value = "";
+  renderProjects();
+}
+
 function deleteProject(event, id) {
   event.stopPropagation();
-  if (confirm("Voulez-vous vraiment supprimer ce projet et toutes ses photos de l'application ?")) {
+  if (confirm("Voulez-vous vraiment supprimer ce projet et toutes ses photos ?")) {
     projects = projects.filter(p => p.id !== id);
     saveProjects();
     renderProjects();
@@ -258,11 +294,25 @@ function deleteProject(event, id) {
 function createProject() {
   const name = document.getElementById("projectInput").value.trim();
   if (!name) return;
-  const project = { id: Date.now(), name: name, photos: 0, photoData: [] };
-  projects.unshift(project);
-  saveProjects();
-  currentProjectId = project.id;
-  openProject();
+  
+  const btn = document.getElementById("btnCreateProject");
+  const originalText = btn.textContent;
+  btn.textContent = "Création...";
+  btn.disabled = true;
+
+  // Petit délai pour éviter le gel visuel
+  setTimeout(() => {
+    const project = { id: Date.now(), name: name, photos: 0, photoData: [] };
+    projects.unshift(project);
+    saveProjects();
+    currentProjectId = project.id;
+    
+    document.getElementById("projectInput").value = "";
+    btn.textContent = originalText;
+    btn.disabled = false;
+    
+    openProject();
+  }, 100);
 }
 
 async function openProject() {
@@ -274,7 +324,7 @@ async function openProject() {
   if (!cameraStream) startCamera();
 }
 
-/* ============== CAMERA CORRIGÉE ============== */
+/* ============== CAMERA ============== */
 async function startCamera() {
   try {
     if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
@@ -302,7 +352,6 @@ async function takePhoto() {
   const p = projects.find(x => x.id === currentProjectId);
   const video = document.getElementById("video");
   
-  // Vérification de sécurité
   if (!p) return alert("Erreur: Projet introuvable.");
   if (!video || !video.srcObject) {
     alert("Veuillez d'abord activer la caméra.");
