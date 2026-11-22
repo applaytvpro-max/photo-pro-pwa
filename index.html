@@ -113,7 +113,6 @@
     <div id="photoGallery" class="photo-gallery"></div>
     
     <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp(event)" data-i18n="sendWhatsapp">📤 ENVOYER SUR WHATSAPP</button>
-    <button class="button secondary" onclick="copyShareText()" style="margin-bottom: 10px;" data-i18n="copyText">📋 COPIER TEXTE (Date + Projet)</button>
     <button class="button secondary" onclick="finishProject()" data-i18n="finishProject">TERMINER LE PROJET</button>
   </section>
 
@@ -141,7 +140,7 @@ const translations = {
     activateFolder: "📂 ACTIVATE PHYSICAL FOLDER", folderConnected: "✅ Physical folder connected",
     takePhoto: "📸 TAKE PHOTO", openCamera: "OPEN CAMERA", flipCamera: "🔄 FLIP",
     gallery: "Project Gallery", selectAll: "Select all", sendWhatsapp: "📤 SEND TO WHATSAPP",
-    copyText: "📋 COPY TEXT (Date + Project)", finishProject: "FINISH PROJECT", navHome: "Home", navProject: "Project"
+    finishProject: "FINISH PROJECT", navHome: "Home", navProject: "Project", project: "Project", date: "Date", at: "at"
   },
   fr: {
     myProjects: "Mes projets", searchPlaceholder: "🔍 Rechercher un projet...", newProject: "+ NOUVEAU PROJET",
@@ -149,7 +148,7 @@ const translations = {
     activateFolder: "📂 ACTIVER LE DOSSIER PHYSIQUE", folderConnected: "✅ Dossier physique connecté",
     takePhoto: "📸 PRENDRE LA PHOTO", openCamera: "OUVRIR CAMÉRA", flipCamera: "🔄 BASCULER",
     gallery: "Galerie du projet", selectAll: "Tout sélectionner", sendWhatsapp: "📤 ENVOYER SUR WHATSAPP",
-    copyText: "📋 COPIER TEXTE (Date + Projet)", finishProject: "TERMINER LE PROJET", navHome: "Accueil", navProject: "Projet"
+    finishProject: "TERMINER LE PROJET", navHome: "Accueil", navProject: "Projet", project: "Projet", date: "Date", at: "à"
   },
   nl: {
     myProjects: "Mijn projecten", searchPlaceholder: "🔍 Zoek een project...", newProject: "+ NIEUW PROJECT",
@@ -157,7 +156,7 @@ const translations = {
     activateFolder: "📂 FYSIEKE MAP ACTIVEREN", folderConnected: "✅ Fysieke map verbonden",
     takePhoto: "📸 FOTO NEMEN", openCamera: "CAMERA OPENEN", flipCamera: "🔄 WISSELEN",
     gallery: "Projectgalerij", selectAll: "Alles selecteren", sendWhatsapp: "📤 VERZENDEN NAAR WHATSAPP",
-    copyText: "📋 TEKST KOPIËREN (Datum + Project)", finishProject: "PROJECT VOLTOOIEN", navHome: "Home", navProject: "Project"
+    finishProject: "PROJECT VOLTOOIEN", navHome: "Home", navProject: "Project", project: "Project", date: "Datum", at: "om"
   }
 };
 
@@ -168,11 +167,8 @@ function t(key) { return translations[currentLang][key] || translations['en'][ke
 function applyTranslations() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.dataset.i18n;
-    if (key === "searchPlaceholder" || key === "projectNamePlaceholder") {
-      el.placeholder = t(key);
-    } else {
-      el.textContent = t(key);
-    }
+    if (key === "searchPlaceholder" || key === "projectNamePlaceholder") el.placeholder = t(key);
+    else el.textContent = t(key);
   });
   document.getElementById("langSelector").value = currentLang;
 }
@@ -328,23 +324,7 @@ function finishProject() {
   showScreen("homeScreen");
 }
 
-/* ============== COPIE DU TEXTE ET PARTAGE ============== */
-function getShareText(p) {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang, { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
-  const timeStr = now.toTimeString().slice(0,5).replace(":", "h");
-  return `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
-}
-
-async function copyShareText() {
-  const p = projects.find(x => x.id === currentProjectId);
-  const text = getShareText(p);
-  try {
-    await navigator.clipboard.writeText(text);
-    alert("Texte copié !\n\n" + text + "\n\nVous pouvez le coller dans WhatsApp.");
-  } catch (e) { alert("Impossible de copier le texte."); }
-}
-
+/* ============== PARTAGE AUTOMATIQUE DU TEXTE VIA FICHIER TXT ============== */
 async function shareSelectedPhotosToWhatsApp(event) {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
@@ -362,6 +342,7 @@ async function shareSelectedPhotosToWhatsApp(event) {
     const files = [];
     const selectedIndices = Array.from(selectedPhotos).sort((a,b) => a-b);
 
+    // 1. Ajouter les photos
     for (const idx of selectedIndices) {
       const dataUrl = p.photoData[idx];
       if (!dataUrl) continue;
@@ -370,11 +351,16 @@ async function shareSelectedPhotosToWhatsApp(event) {
       const arr = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
       
-      // Le nom du projet est inclus dans le nom du fichier
       const filename = `${p.name}_${dateStr}_${timeStr}_P${idx+1}.jpg`;
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
+    // 2. Ajouter le fichier texte d'informations (la solution !)
+    const shareText = `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
+    const textFile = new File([shareText], `${p.name}_INFO.txt`, { type: "text/plain" });
+    files.push(textFile);
+
+    // 3. Envoi direct
     const shareData = { files: files };
 
     if (navigator.canShare && navigator.canShare(shareData)) {
@@ -383,7 +369,7 @@ async function shareSelectedPhotosToWhatsApp(event) {
       alert("Votre téléphone ne supporte pas le partage direct. Un fichier ZIP va être utilisé.");
       const zipBlob = await createZipBlob(files);
       const zipFile = new File([zipBlob], `${p.name}_${dateStr}.zip`, { type: "application/zip" });
-      await navigator.share({ files: [zipFile], title: `${t('project')} ${p.name}` });
+      await navigator.share({ files: [zipFile] });
     }
 
   } catch (e) {
