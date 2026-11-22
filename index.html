@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
   
-  <!-- Liens pour les icônes et le manifest (Ajout pour le logo) -->
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
@@ -32,11 +31,13 @@
     .success { background: #16a34a; color: white; }
     .whatsapp-btn { background: #25D366; color: white; display: flex; justify-content: center; align-items: center; gap: 10px;}
     
+    /* AMÉLIORATION DES CARTES PROJETS */
     .projects { margin-top: 10px; }
-    .project { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; cursor: pointer; }
-    .project-name { font-weight: 700; }
-    .project-info { margin-top: 4px; color: #64748b; font-size: 12px; }
-    .photo-count { font-weight: 700; color: #2563eb; background: #e0f2fe; padding: 4px 8px; border-radius: 6px; }
+    .project { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 10px; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s; }
+    .project:active { transform: scale(0.98); background: #f8fafc; }
+    .project-name { font-weight: 700; font-size: 16px; color: #1e293b; }
+    .project-date { margin-top: 4px; color: #64748b; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+    .photo-count { font-weight: 700; color: #2563eb; background: #e0f2fe; padding: 4px 8px; border-radius: 6px; font-size: 13px; white-space: nowrap; margin-right: 10px;}
     
     .camera-container { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; background: #111827; margin-bottom: 10px; }
     #video { width: 100%; height: 100%; object-fit: cover; display: none; }
@@ -212,23 +213,33 @@ async function initPhysicalStorage() {
   }
 }
 
-/* ============== PROJETS & CAMERA ============== */
+/* ============== PROJETS (TRIÉS PAR DATE) ============== */
 function renderProjects() {
   const container = document.getElementById("projectList");
   const term = document.getElementById("searchInput").value.toLowerCase();
   container.innerHTML = "";
   
-  projects.filter(p => p.name.toLowerCase().includes(term)).forEach(p => {
+  // 1. Trier les projets du plus récent au plus ancien
+  const sortedProjects = [...projects].sort((a, b) => b.id - a.id);
+  
+  // 2. Filtrer selon la recherche
+  const filtered = sortedProjects.filter(p => p.name.toLowerCase().includes(term));
+
+  filtered.forEach(p => {
     const el = document.createElement("div");
     el.className = "project";
     el.onclick = () => { currentProjectId = p.id; openProject(); };
     
-    // Bouton de suppression
+    // Formater la date pour l'affichage
+    const d = new Date(p.id);
+    const dateAffichage = d.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+
     el.innerHTML = `
       <div style="flex: 1;">
         <div class="project-name">${p.name}</div>
-        <div class="project-info">${p.photos} photos</div>
+        <div class="project-date">📅 ${dateAffichage}</div>
       </div>
+      <div class="photo-count">${p.photos} 📸</div>
       <button onclick="deleteProject(event, ${p.id})" style="background: #fee2e2; color: #991b1b; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer;">🗑️</button>
     `;
     container.appendChild(el);
@@ -263,6 +274,7 @@ async function openProject() {
   if (!cameraStream) startCamera();
 }
 
+/* ============== CAMERA CORRIGÉE ============== */
 async function startCamera() {
   try {
     if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
@@ -289,18 +301,28 @@ function flipCamera() { cameraFacing = cameraFacing === "environment" ? "user" :
 async function takePhoto() {
   const p = projects.find(x => x.id === currentProjectId);
   const video = document.getElementById("video");
-  if (!cameraStream || !p) return;
+  
+  // Vérification de sécurité
+  if (!p) return alert("Erreur: Projet introuvable.");
+  if (!video || !video.srcObject) {
+    alert("Veuillez d'abord activer la caméra.");
+    return startCamera();
+  }
 
   const flash = document.getElementById("flashEffect");
   flash.style.opacity = "0.8";
   setTimeout(() => flash.style.opacity = "0", 150);
 
   const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth; 
-  canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth || 1080; 
+  canvas.height = video.videoHeight || 1440;
   const ctx = canvas.getContext("2d");
-  if (cameraFacing === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-  ctx.drawImage(video, 0, 0);
+  
+  if (cameraFacing === "user") { 
+    ctx.translate(canvas.width, 0); 
+    ctx.scale(-1, 1); 
+  }
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   
   const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
   
@@ -314,7 +336,7 @@ async function takePhoto() {
       const blob = await (await fetch(dataUrl)).blob();
       await writable.write(blob);
       await writable.close();
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Erreur sauvegarde physique:", err); }
   }
 
   p.photoData.push(dataUrl);
@@ -398,7 +420,7 @@ async function shareSelectedPhotosToWhatsApp(event) {
     if (navigator.canShare && navigator.canShare(shareData)) {
       await navigator.share(shareData);
       setTimeout(() => {
-        alert("Photos envoyées.\n\nLe texte (Projet + Date) a été copié automatiquement.\nDans WhatsApp, faites un appui long dans la barre de message et cliquez sur 'Coller'.\n\n⚠️ N'oubliez pas d'activer 'Meilleure qualité' dans les paramètres WhatsApp > Stockage et données.");
+        alert("Photos envoyées.\n\nLe texte (Projet + Date) a été copié automatiquement.\nDans WhatsApp, faites un appui long dans la barre de message et cliquez sur 'Coller'.");
       }, 800);
     } else {
       alert("Votre téléphone ne supporte pas le partage direct. Un fichier ZIP va être utilisé.");
