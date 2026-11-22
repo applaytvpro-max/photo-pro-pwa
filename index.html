@@ -70,17 +70,17 @@
   </header>
 
   <section id="homeScreen" class="screen active">
-    <div class="title">Mes projets</div>
-    <input type="text" id="searchInput" class="input" placeholder="🔍 Rechercher un projet..." oninput="renderProjects()" />
-    <button class="button primary" onclick="showScreen('newProjectScreen')">+ NOUVEAU PROJET</button>
+    <div class="title" data-i18n="myProjects">Mes projets</div>
+    <input type="text" id="searchInput" class="input" data-i18n="searchPlaceholder" placeholder="🔍 Rechercher un projet..." oninput="renderProjects()" />
+    <button class="button primary" onclick="showScreen('newProjectScreen')" data-i18n="newProject">+ NOUVEAU PROJET</button>
     <div class="projects"><div id="projectList"></div></div>
   </section>
 
   <section id="newProjectScreen" class="screen">
-    <div class="title">Nouveau projet</div>
-    <input id="projectInput" class="input" type="text" placeholder="Nom ou numéro de projet" />
-    <button class="button primary" onclick="createProject()">CRÉER ET OUVRIR</button>
-    <button class="button secondary" onclick="showScreen('homeScreen')">Retour</button>
+    <div class="title" data-i18n="newProject">Nouveau projet</div>
+    <input id="projectInput" class="input" type="text" data-i18n="projectNamePlaceholder" placeholder="Nom ou numéro de projet" />
+    <button class="button primary" onclick="createProject()" data-i18n="createOpen">CRÉER ET OUVRIR</button>
+    <button class="button secondary" onclick="showScreen('homeScreen')" data-i18n="back">Retour</button>
   </section>
 
   <section id="cameraScreen" class="screen">
@@ -92,36 +92,37 @@
       <div id="flashEffect" class="flash-effect"></div>
     </div>
 
-    <button id="btnStorage" class="button success" onclick="initPhysicalStorage()" style="display: block;">📂 ACTIVER LE DOSSIER PHYSIQUE</button>
-    <div id="storageStatus" style="font-size: 13px; color: #16a34a; margin-bottom: 10px; display: none;">✅ Dossier physique connecté</div>
+    <button id="btnStorage" class="button success" onclick="initPhysicalStorage()" style="display: block;" data-i18n="activateFolder">📂 ACTIVER LE DOSSIER PHYSIQUE</button>
+    <div id="storageStatus" style="font-size: 13px; color: #16a34a; margin-bottom: 10px; display: none;" data-i18n="folderConnected">✅ Dossier physique connecté</div>
 
-    <button class="main-capture-btn" onclick="takePhoto()">📸 PRENDRE LA PHOTO</button>
+    <button class="main-capture-btn" onclick="takePhoto()" data-i18n="takePhoto">📸 PRENDRE LA PHOTO</button>
 
     <div class="camera-controls">
-      <button class="button secondary" onclick="startCamera()">OUVRIR CAMÉRA</button>
-      <button class="button secondary" onclick="flipCamera()">🔄 BASCULER</button>
+      <button class="button secondary" onclick="startCamera()" data-i18n="openCamera">OUVRIR CAMÉRA</button>
+      <button class="button secondary" onclick="flipCamera()" data-i18n="flipCamera">🔄 BASCULER</button>
     </div>
 
     <div class="gallery-header">
-      <div style="font-weight:700;">Galerie du projet</div>
+      <div style="font-weight:700;" data-i18n="gallery">Galerie du projet</div>
       <div>
-        <button onclick="toggleSelectAll()" style="background:none; border:none; color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline;">Tout sélectionner</button>
+        <button onclick="toggleSelectAll()" style="background:none; border:none; color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline;" data-i18n="selectAll">Tout sélectionner</button>
         <span id="selectedCount" style="color:#2563eb; font-weight:bold; margin-left:10px;">0</span>
       </div>
     </div>
     
     <div id="photoGallery" class="photo-gallery"></div>
     
-    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp(event)">📤 ENVOYER SUR WHATSAPP</button>
-    <button class="button secondary" onclick="finishProject()">TERMINER LE PROJET</button>
+    <button class="button whatsapp-btn" onclick="shareSelectedPhotosToWhatsApp(event)" data-i18n="sendWhatsapp">📤 ENVOYER SUR WHATSAPP</button>
+    <button class="button secondary" onclick="copyShareText()" style="margin-bottom: 10px;" data-i18n="copyText">📋 COPIER TEXTE (Date + Projet)</button>
+    <button class="button secondary" onclick="finishProject()" data-i18n="finishProject">TERMINER LE PROJET</button>
   </section>
 
   <nav class="bottom-nav">
     <button class="nav-button active" data-screen="homeScreen" onclick="showScreen('homeScreen')">
-      <span class="nav-icon">🏠</span>Accueil
+      <span class="nav-icon">🏠</span><span data-i18n="navHome">Accueil</span>
     </button>
     <button class="nav-button" data-screen="newProjectScreen" onclick="showScreen('newProjectScreen')">
-      <span class="nav-icon">➕</span>Projet
+      <span class="nav-icon">➕</span><span data-i18n="navProject">Projet</span>
     </button>
   </nav>
 </div>
@@ -134,16 +135,52 @@
 <script>
 /* ============== TRADUCTIONS ============== */
 const translations = {
-  en: { project: "Project", date: "Date", at: "at" },
-  fr: { project: "Projet", date: "Date", at: "à" },
-  nl: { project: "Project", date: "Datum", at: "om" }
+  en: {
+    myProjects: "My Projects", searchPlaceholder: "🔍 Search for a project...", newProject: "+ NEW PROJECT",
+    projectNamePlaceholder: "Project name or number", createOpen: "CREATE AND OPEN", back: "Back",
+    activateFolder: "📂 ACTIVATE PHYSICAL FOLDER", folderConnected: "✅ Physical folder connected",
+    takePhoto: "📸 TAKE PHOTO", openCamera: "OPEN CAMERA", flipCamera: "🔄 FLIP",
+    gallery: "Project Gallery", selectAll: "Select all", sendWhatsapp: "📤 SEND TO WHATSAPP",
+    copyText: "📋 COPY TEXT (Date + Project)", finishProject: "FINISH PROJECT", navHome: "Home", navProject: "Project"
+  },
+  fr: {
+    myProjects: "Mes projets", searchPlaceholder: "🔍 Rechercher un projet...", newProject: "+ NOUVEAU PROJET",
+    projectNamePlaceholder: "Nom ou numéro de projet", createOpen: "CRÉER ET OUVRIR", back: "Retour",
+    activateFolder: "📂 ACTIVER LE DOSSIER PHYSIQUE", folderConnected: "✅ Dossier physique connecté",
+    takePhoto: "📸 PRENDRE LA PHOTO", openCamera: "OUVRIR CAMÉRA", flipCamera: "🔄 BASCULER",
+    gallery: "Galerie du projet", selectAll: "Tout sélectionner", sendWhatsapp: "📤 ENVOYER SUR WHATSAPP",
+    copyText: "📋 COPIER TEXTE (Date + Projet)", finishProject: "TERMINER LE PROJET", navHome: "Accueil", navProject: "Projet"
+  },
+  nl: {
+    myProjects: "Mijn projecten", searchPlaceholder: "🔍 Zoek een project...", newProject: "+ NIEUW PROJECT",
+    projectNamePlaceholder: "Projectnaam of nummer", createOpen: "AANMAKEN EN OPENEN", back: "Terug",
+    activateFolder: "📂 FYSIEKE MAP ACTIVEREN", folderConnected: "✅ Fysieke map verbonden",
+    takePhoto: "📸 FOTO NEMEN", openCamera: "CAMERA OPENEN", flipCamera: "🔄 WISSELEN",
+    gallery: "Projectgalerij", selectAll: "Alles selecteren", sendWhatsapp: "📤 VERZENDEN NAAR WHATSAPP",
+    copyText: "📋 TEKST KOPIËREN (Datum + Project)", finishProject: "PROJECT VOLTOOIEN", navHome: "Home", navProject: "Project"
+  }
 };
+
 let currentLang = localStorage.getItem("photo_pro_lang") || "fr";
-function t(key) { return translations[currentLang][key] || translations['en'][key]; }
+
+function t(key) { return translations[currentLang][key] || translations['en'][key] || key; }
+
+function applyTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    if (key === "searchPlaceholder" || key === "projectNamePlaceholder") {
+      el.placeholder = t(key);
+    } else {
+      el.textContent = t(key);
+    }
+  });
+  document.getElementById("langSelector").value = currentLang;
+}
+
 function changeLanguage(lang) {
   currentLang = lang;
   localStorage.setItem("photo_pro_lang", lang);
-  document.getElementById("langSelector").value = lang;
+  applyTranslations();
 }
 
 /* ============== ETAT & VARIABLES DE STOCKAGE ============== */
@@ -164,15 +201,12 @@ function showScreen(id) {
 /* ============== ACTIVATION DU STOCKAGE PHYSIQUE ============== */
 async function initPhysicalStorage() {
   try {
-    rootDirectoryHandle = await window.showDirectoryPicker({
-      mode: 'readwrite',
-      startIn: 'pictures'
-    });
+    rootDirectoryHandle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: 'pictures' });
     document.getElementById("btnStorage").style.display = "none";
     document.getElementById("storageStatus").style.display = "block";
-    alert("Dossier '" + rootDirectoryHandle.name + "' connecté avec succès ! Les photos seront sauvegardées ici.");
+    alert("Dossier '" + rootDirectoryHandle.name + "' connecté !");
   } catch (e) {
-    if (e.name !== 'AbortError') alert("Erreur lors de la sélection du dossier : " + e.message);
+    if (e.name !== 'AbortError') alert("Erreur : " + e.message);
   }
 }
 
@@ -236,7 +270,6 @@ async function takePhoto() {
   if (cameraFacing === "user") { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
   ctx.drawImage(video, 0, 0);
   
-  // AMÉLIORATION : Qualité maximale (1.0) au lieu de 0.7 pour le stockage physique
   const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
   
   if (rootDirectoryHandle) {
@@ -279,7 +312,7 @@ function renderGallery(p) {
     gallery.appendChild(div);
   });
 
-  document.getElementById("selectedCount").textContent = `${selectedPhotos.size} sélectionnée(s)`;
+  document.getElementById("selectedCount").textContent = `${selectedPhotos.size}`;
 }
 
 function toggleSelectAll() {
@@ -295,7 +328,23 @@ function finishProject() {
   showScreen("homeScreen");
 }
 
-/* ============== PARTAGE CORRIGÉ ET AMÉLIORÉ ============== */
+/* ============== COPIE DU TEXTE ET PARTAGE ============== */
+function getShareText(p) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString(currentLang === 'en' ? 'en-GB' : currentLang, { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+  const timeStr = now.toTimeString().slice(0,5).replace(":", "h");
+  return `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
+}
+
+async function copyShareText() {
+  const p = projects.find(x => x.id === currentProjectId);
+  const text = getShareText(p);
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Texte copié !\n\n" + text + "\n\nVous pouvez le coller dans WhatsApp.");
+  } catch (e) { alert("Impossible de copier le texte."); }
+}
+
 async function shareSelectedPhotosToWhatsApp(event) {
   const p = projects.find(x => x.id === currentProjectId);
   if (selectedPhotos.size === 0) return alert("Veuillez sélectionner au moins une photo.");
@@ -321,49 +370,31 @@ async function shareSelectedPhotosToWhatsApp(event) {
       const arr = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
       
+      // Le nom du projet est inclus dans le nom du fichier
       const filename = `${p.name}_${dateStr}_${timeStr}_P${idx+1}.jpg`;
       files.push(new File([arr], filename, { type: "image/jpeg" }));
     }
 
-    const shareText = `${t('project')}: ${p.name}\n${t('date')}: ${dateStr} ${t('at')} ${timeStr}`;
-    await navigator.clipboard.writeText(shareText);
-
-    // Si le téléphone supporte le partage, on envoie sans le texte pour éviter le bug
     const shareData = { files: files };
 
     if (navigator.canShare && navigator.canShare(shareData)) {
       await navigator.share(shareData);
-      
-      // Notification après fermeture du menu WhatsApp
-      setTimeout(() => {
-        alert("Photos envoyées !\n\nLe texte a été copié. Dans WhatsApp, faites un appui long dans la zone de message et cliquez sur 'Coller'.");
-      }, 1000);
-      
     } else {
-      // Solution de secours : Envoi groupé via ZIP si le téléphone refuse le multi-partage
-      alert("Votre téléphone ne supporte pas le partage direct de plusieurs fichiers. Création d'un ZIP...");
+      alert("Votre téléphone ne supporte pas le partage direct. Un fichier ZIP va être utilisé.");
       const zipBlob = await createZipBlob(files);
       const zipFile = new File([zipBlob], `${p.name}_${dateStr}.zip`, { type: "application/zip" });
-      
-      await navigator.share({
-        files: [zipFile],
-        title: `${t('project')} ${p.name}`,
-        text: shareText
-      });
+      await navigator.share({ files: [zipFile], title: `${t('project')} ${p.name}` });
     }
 
   } catch (e) {
-    if (e.name !== 'AbortError') {
-      console.error(e);
-      alert("Erreur lors du partage : " + e.message);
-    }
+    if (e.name !== 'AbortError') alert("Erreur : " + e.message);
   } finally {
     btn.textContent = originalText;
     btn.disabled = false;
   }
 }
 
-/* ============== FONCTION ZIP DE SECOURS ============== */
+/* ============== ZIP SECOURS ============== */
 async function createZipBlob(files) {
   const chunks = []; const encoder = new TextEncoder(); const centralDir = []; let offset = 0;
   function crc32(data) {
@@ -401,7 +432,7 @@ async function createZipBlob(files) {
 }
 
 // Initialisation
-document.getElementById("langSelector").value = currentLang;
+applyTranslations();
 renderProjects();
 </script>
 </body>
